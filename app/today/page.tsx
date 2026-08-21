@@ -15,7 +15,7 @@ export default async function TodayPage() {
     <div className="min-h-screen bg-background pb-16 sm:pb-0">
       <TopNav active="today" email={user.email} />
 
-      <main className="mx-auto max-w-3xl px-4 py-6">
+      <main className="mx-auto max-w-3xl px-5 py-8">
         <TodayClient email={user.email ?? ""} />
         <PlaceholderGrid />
         <form

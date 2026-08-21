@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>External Brain — Preview (Phase 2 Gate)</title>
+  <title>External Brain — Preview (Phase 2 Gate — updated: darker border, green shades, more spacing)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script>
@@ -15,13 +15,17 @@
             surface: '#FFFFFF',
             foreground: '#2B2B28',
             muted: '#6B7280',
-            accent: '#7C9082',
-            'accent-hover': '#6A7D70',
+            accent: '#6B8F7A',
+            'accent-hover': '#5A7A67',
+            'accent-soft': '#E8F0E8',
+            'accent-muted': '#A8C0B5',
+            'accent-dark': '#4A5E54',
             warning: '#D6A15C',
-            border: '#E8E6E0',
+            border: '#D6D3CC',
+            'border-strong': '#C9C5BC',
           },
           fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
-          borderRadius: { card: '12px', button: '10px' }
+          borderRadius: { card: '14px', button: '10px' }
         }
       }
     }
@@ -29,51 +33,50 @@
   <style>body{font-family:Inter,system-ui,sans-serif}</style>
 </head>
 <body class="bg-background text-foreground min-h-screen antialiased">
-  <!-- Top Nav mock -->
-  <header class="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur">
-    <div class="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-2">
-        <span class="h-7 w-7 rounded-button bg-accent flex items-center justify-center text-white text-xs font-semibold">B</span>
-        <span class="text-sm font-semibold">External Brain</span>
+  <!-- Top Nav mock — more spacing, aligned -->
+  <header class="sticky top-0 z-10 border-b border-border bg-surface/90 backdrop-blur">
+    <div class="mx-auto max-w-3xl flex items-center justify-between px-5 py-3.5">
+      <div class="flex items-center gap-3">
+        <span class="h-8 w-8 rounded-button bg-accent flex items-center justify-center text-white text-xs font-semibold shadow-sm">B</span>
+        <span class="text-sm font-semibold tracking-tight">External Brain</span>
       </div>
-      <nav class="flex items-center gap-1 text-xs">
+      <nav class="flex items-center gap-1.5 text-xs">
         <span class="rounded-button bg-accent px-3 py-1.5 text-white font-medium">Today</span>
         <span class="px-3 py-1.5 text-muted">Tasks</span>
         <span class="px-3 py-1.5 text-muted">Habits</span>
-        <span class="ml-2 pl-3 border-l border-border text-muted">you@example.com</span>
+        <span class="ml-3 pl-4 border-l border-border-strong text-muted">you@example.com</span>
       </nav>
     </div>
   </header>
 
-  <main class="mx-auto max-w-3xl px-4 py-6 space-y-4 pb-20">
-    <!-- Meta -->
-    <div class="flex items-center justify-between">
+  <main class="mx-auto max-w-3xl px-5 py-8 space-y-6 pb-24">
+    <!-- Meta — aligned -->
+    <div class="flex items-center justify-between px-1">
       <div>
         <p class="text-xs text-muted">Signed in as you@example.com</p>
-        <p class="text-sm"><span class="font-medium">2 done today</span><span class="text-muted"> · no streak shame</span></p>
+        <p class="text-sm mt-1"><span class="font-medium">2 done today</span><span class="text-muted"> · no streak shame</span></p>
       </div>
-      <button class="text-xs rounded-button border border-warning/30 bg-warning/10 px-3 py-1.5 hover:bg-warning/15">I’m stuck</button>
+      <button class="text-xs rounded-button border border-warning/30 bg-warning/10 px-4 py-2 hover:bg-warning/15">I’m stuck</button>
     </div>
 
-    <!-- Brain Dump -->
-    <div class="rounded-card border border-border bg-surface p-4">
+    <!-- Brain Dump — more padding -->
+    <div class="rounded-card border border-border bg-surface p-5">
       <div class="flex items-center justify-between">
-        <span class="text-sm font-medium">Brain dump</span>
-        <span class="text-xs text-muted border border-border rounded-button px-2 py-1 bg-background">Add messy thoughts</span>
+        <span class="text-sm font-semibold tracking-tight">Brain dump</span>
+        <span class="text-xs font-medium text-muted border border-border rounded-button px-3 py-1.5 bg-background">Add messy thoughts</span>
       </div>
-      <div class="mt-3 space-y-3">
-        <textarea rows="2" placeholder="Paste messy thoughts — e.g. call dentist, mom's bday gift, report due friday" class="w-full rounded-button border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted focus:border-accent focus:outline-none"></textarea>
-        <div class="flex gap-2">
-          <button class="rounded-button bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover">Organize</button>
+      <div class="mt-4 space-y-4">
+        <textarea rows="3" placeholder="Paste messy thoughts — e.g. call dentist, mom's bday gift, report due friday" class="w-full rounded-card border border-border bg-background px-4 py-3 text-sm placeholder:text-muted focus:border-accent focus:outline-none"></textarea>
+        <div class="flex gap-3">
+          <button class="rounded-button bg-accent px-6 py-2 text-sm font-medium text-white hover:bg-accent-hover">Organize</button>
           <button class="rounded-button border border-border bg-surface px-4 py-2 text-sm">Clear</button>
         </div>
-        <!-- Preview confirmation -->
-        <div class="rounded-card border border-accent/20 bg-accent/10 p-3">
-          <p class="text-xs font-medium mb-2">Preview — uncheck to skip (mock)</p>
-          <label class="flex items-center gap-2 text-sm bg-surface rounded-button px-3 py-2 border border-border mb-1.5"><input type="checkbox" checked /> Call dentist to schedule</label>
-          <label class="flex items-center gap-2 text-sm bg-surface rounded-button px-3 py-2 border border-border mb-1.5"><input type="checkbox" checked /> Buy gift for mom's birthday</label>
-          <label class="flex items-center gap-2 text-sm bg-surface rounded-button px-3 py-2 border border-border"><input type="checkbox" checked /> Draft report due Friday</label>
-          <div class="mt-3 flex gap-2">
+        <div class="rounded-card border border-accent-muted bg-accent-soft p-4">
+          <p class="text-xs font-semibold text-accent-dark mb-3">Preview — uncheck to skip (mock)</p>
+          <label class="flex items-center gap-3 text-sm bg-surface rounded-button px-4 py-3 border border-border mb-2"><input type="checkbox" checked /> Call dentist to schedule</label>
+          <label class="flex items-center gap-3 text-sm bg-surface rounded-button px-4 py-3 border border-border mb-2"><input type="checkbox" checked /> Buy gift for mom's birthday</label>
+          <label class="flex items-center gap-3 text-sm bg-surface rounded-button px-4 py-3 border border-border"><input type="checkbox" checked /> Draft report due Friday</label>
+          <div class="mt-4 flex gap-3">
             <button class="rounded-button bg-accent px-4 py-2 text-sm text-white">Add to backlog</button>
             <button class="rounded-button border border-border bg-surface px-4 py-2 text-sm">Dismiss</button>
           </div>
@@ -81,59 +84,63 @@
       </div>
     </div>
 
-    <!-- Focus Card -->
-    <div class="rounded-card border border-border bg-surface p-6">
-      <p class="text-xs font-medium tracking-wide text-muted uppercase">Now</p>
-      <h2 class="mt-2 text-xl font-semibold leading-snug">Open resume file</h2>
-      <p class="mt-1.5 text-xs text-muted">2 min · one tiny step</p>
-      <div class="mt-5 flex flex-wrap gap-2">
-        <button class="rounded-button border border-border bg-surface px-4 py-2 text-sm">Stuck</button>
-        <button class="rounded-button bg-accent/10 border border-accent/20 px-4 py-2 text-sm">Still on it</button>
-        <button class="rounded-button bg-accent px-4 py-2 text-sm font-medium text-white">Done</button>
+    <!-- Focus Card — more spacing, green shade header -->
+    <div class="rounded-card border border-border bg-surface p-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1">
+          <p class="text-[11px] font-medium tracking-widest text-accent-muted uppercase">Now — one thing</p>
+          <h2 class="mt-2.5 text-[22px] font-semibold leading-snug tracking-tight">Open resume file</h2>
+          <p class="mt-2 text-xs text-muted">2 min · one tiny step</p>
+        </div>
+        <span class="hidden sm:inline-flex h-2 w-2 rounded-full bg-accent animate-pulse mt-2"></span>
       </div>
-      <div class="mt-6 flex items-center gap-2 text-xs text-muted"><span class="h-2 w-2 rounded-full bg-accent animate-pulse"></span>Stay here — other tasks are quietly below.</div>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <button class="rounded-button border border-border bg-surface px-4 py-2 text-sm min-w-[84px]">Stuck</button>
+        <button class="rounded-button bg-accent-soft border border-accent-muted px-4 py-2 text-sm min-w-[108px]">Still on it</button>
+        <button class="rounded-button bg-accent px-4 py-2 text-sm font-medium text-white min-w-[84px]">Done</button>
+      </div>
+      <div class="mt-6 flex items-center gap-2 text-xs text-muted border-t border-border/60 pt-4"><span class="h-1.5 w-1.5 rounded-full bg-accent"></span>Stay here — other tasks sit quietly below.</div>
     </div>
 
-    <!-- Up Next -->
-    <div class="mt-1">
-      <p class="text-xs font-medium text-muted px-1 mb-2">Up next — tap to focus</p>
-      <div class="space-y-2">
-        <button class="w-full text-left rounded-card border border-border bg-surface px-4 py-3"><p class="text-sm">Write one paragraph of cover letter</p><p class="text-xs text-muted">5 min</p></button>
-        <button class="w-full text-left rounded-card border border-border bg-surface px-4 py-3"><p class="text-sm">Drink water and stand up</p><p class="text-xs text-muted">1 min</p></button>
+    <!-- Up Next — darker border, more gap -->
+    <div>
+      <p class="text-[11px] font-medium tracking-wide text-muted px-1 mb-3 uppercase">Up next — tap to focus</p>
+      <div class="space-y-2.5">
+        <button class="w-full text-left rounded-card border border-border bg-surface px-5 py-3.5 hover:bg-accent-soft hover:border-accent-muted"><p class="text-sm font-medium">Write one paragraph of cover letter</p><p class="text-xs text-muted mt-1">5 min</p></button>
+        <button class="w-full text-left rounded-card border border-border bg-surface px-5 py-3.5 hover:bg-accent-soft hover:border-accent-muted"><p class="text-sm font-medium">Drink water and stand up</p><p class="text-xs text-muted mt-1">1 min</p></button>
       </div>
     </div>
 
-    <!-- Habit + Urge -->
-    <div class="rounded-card border border-border bg-surface p-4 flex items-center justify-between">
-      <div><p class="text-sm font-medium">Drink water</p><p class="text-xs text-muted">Habit · 2 today</p></div>
-      <button class="rounded-button bg-accent px-3 py-1.5 text-xs font-medium text-white">Log</button>
+    <!-- Habit + Urge — more padding -->
+    <div class="rounded-card border border-border bg-surface p-5 flex items-center justify-between">
+      <div><p class="text-sm font-medium">Drink water</p><p class="text-xs text-muted mt-0.5">Habit · 2 today</p></div>
+      <button class="rounded-button bg-accent px-4 py-2 text-xs font-medium text-white hover:bg-accent-hover">Log</button>
     </div>
-    <div class="rounded-card border border-border bg-surface p-4 flex items-center justify-between">
-      <div><p class="text-sm font-medium">Had an urge?</p><p class="text-xs text-muted">Log calmly — 60-sec step, no shame.</p></div>
-      <button class="rounded-button border border-border px-3 py-1.5 text-xs">Had urge</button>
-    </div>
-
-    <!-- Placeholder grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mt-2">
-      <div class="rounded-card border border-border bg-surface p-4"><p class="text-muted">Life Map</p><p class="font-medium mt-1">Coming soon</p></div>
-      <div class="rounded-card border border-border bg-surface p-4"><p class="text-muted">Learn</p><p class="font-medium mt-1">Coming soon</p></div>
-      <div class="rounded-card border border-border bg-surface p-4"><p class="text-muted">Insights</p><p class="font-medium mt-1">Coming soon</p></div>
-      <div class="rounded-card border border-border bg-surface p-4"><p class="text-muted">Game</p><p class="font-medium mt-1">Coming soon</p></div>
+    <div class="rounded-card border border-border bg-surface p-5 flex items-center justify-between">
+      <div><p class="text-sm font-medium">Had an urge?</p><p class="text-xs text-muted mt-0.5">Log calmly — 60-sec step, no shame.</p></div>
+      <button class="rounded-button border border-border px-4 py-2 text-xs hover:bg-accent-soft">Had urge</button>
     </div>
 
-    <!-- Rescue overlay example (static) -->
-    <div class="rounded-card border border-border bg-surface p-6 shadow-sm">
-      <p class="text-xs font-medium tracking-wide text-muted uppercase">Rescue — example overlay</p>
-      <p class="mt-3 text-xl font-semibold">Put your feet on the floor.</p>
-      <p class="mt-1 text-xs text-muted">One tiny step. Ask for smaller if needed.</p>
-      <div class="mt-4 flex gap-2"><button class="flex-1 rounded-button bg-accent text-white py-2 text-sm">Done</button><button class="flex-1 rounded-button border border-border py-2 text-sm">Need smaller step</button></div>
+    <!-- Placeholder grid — more spacing -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+      <div class="rounded-card border border-border bg-surface p-5"><p class="text-[11px] tracking-wide uppercase text-muted">Life Map</p><p class="font-medium mt-1.5">Coming soon</p></div>
+      <div class="rounded-card border border-border bg-surface p-5"><p class="text-[11px] tracking-wide uppercase text-muted">Learn</p><p class="font-medium mt-1.5">Coming soon</p></div>
+      <div class="rounded-card border border-border bg-surface p-5"><p class="text-[11px] tracking-wide uppercase text-muted">Insights</p><p class="font-medium mt-1.5">Coming soon</p></div>
+      <div class="rounded-card border border-border bg-surface p-5"><p class="text-[11px] tracking-wide uppercase text-muted">Game</p><p class="font-medium mt-1.5">Coming soon</p></div>
     </div>
 
-    <p class="text-center text-xs text-muted pt-4">Preview — open this file by double-click. Approve: colors (#FAFAF8 / #7C9082), Inter, 12px, no red. If good, tell agent to continue to Phase 3.</p>
+    <!-- Rescue example — green shades -->
+    <div class="rounded-card border border-border-strong bg-surface p-8 shadow-sm">
+      <p class="text-[11px] font-semibold tracking-widest text-accent-muted uppercase">Rescue — example overlay</p>
+      <p class="mt-4 text-[22px] font-semibold tracking-tight">Put your feet on the floor.</p>
+      <p class="mt-2.5 text-xs text-muted">One tiny step. Ask for smaller if needed.</p>
+      <div class="mt-8 flex gap-3"><button class="flex-1 rounded-button bg-accent text-white py-3 text-sm">Done</button><button class="flex-1 rounded-button border border-border py-3 text-sm">Need smaller step</button></div>
+    </div>
+
+    <p class="text-center text-xs text-muted pt-2">Updated preview — darker border #D6D3CC, green shades #6B8F7A/#E8F0E8/#A8C0B5, radius 14px, more spacing (24px). Approve?</p>
   </main>
 
-  <!-- Mobile nav mock -->
-  <nav class="sm:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-surface flex justify-around py-2 text-xs">
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 border-t border-border-strong bg-surface flex justify-around py-2.5 text-xs">
     <span class="flex flex-col items-center text-accent font-medium"><span>◉</span><span>Today</span></span>
     <span class="flex flex-col items-center text-muted"><span>☰</span><span>Tasks</span></span>
     <span class="flex flex-col items-center text-muted"><span>♡</span><span>Habits</span></span>

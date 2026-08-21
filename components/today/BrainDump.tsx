@@ -37,28 +37,28 @@ export function BrainDump({
   }
 
   return (
-    <Card className="p-4">
+    <Card className="p-5">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between text-left"
       >
-        <span className="text-sm font-medium text-foreground">Brain dump</span>
-        <span className="text-xs text-muted border border-border rounded-button px-2 py-1 bg-background">
+        <span className="text-sm font-semibold tracking-tight text-foreground">Brain dump</span>
+        <span className="text-xs font-medium text-muted border border-border rounded-button px-3 py-1.5 bg-background hover:bg-accent-soft hover:text-accent-dark">
           {open ? "Hide" : "Add messy thoughts"}
         </span>
       </button>
 
       {open && (
-        <div className="mt-3 space-y-3">
+        <div className="mt-4 space-y-4">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="Paste messy thoughts — e.g. call dentist, mom's bday gift, report due friday"
-            className="w-full rounded-button border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full rounded-card border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
-          <div className="flex gap-2">
-            <Button variant="primary" onClick={handleParse} disabled={loading || !text.trim()}>
+          <div className="flex gap-3">
+            <Button variant="primary" onClick={handleParse} disabled={loading || !text.trim()} className="px-6">
               {loading ? "Looking…" : "Organize"}
             </Button>
             <Button variant="outline" onClick={() => setText("")}>
@@ -67,19 +67,19 @@ export function BrainDump({
           </div>
 
           {preview && (
-            <div className="rounded-card border border-accent/20 bg-accent/10 p-3">
-              <p className="text-xs font-medium text-foreground mb-2">
-                Preview — uncheck anything to skip (Phase 2 mock)
+            <div className="rounded-card border border-accent-muted bg-accent-soft p-4">
+              <p className="text-xs font-semibold text-accent-dark mb-3">
+                Preview — uncheck anything to skip (mock)
               </p>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {preview.map((p, i) => (
-                  <label key={i} className="flex items-center gap-2 text-sm bg-surface rounded-button px-3 py-2 border border-border">
+                  <label key={i} className="flex items-center gap-3 text-sm bg-surface rounded-button px-4 py-3 border border-border">
                     <input type="checkbox" defaultChecked className="accent-accent" />
                     <span className="text-foreground">{p.title}</span>
                   </label>
                 ))}
               </div>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-4 flex gap-3">
                 <Button variant="primary" onClick={() => onConfirm?.(preview)} disabled={disabled}>
                   Add to backlog
                 </Button>

@@ -33,19 +33,19 @@ export function TodayClient({ email }: { email: string }) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header meta */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header meta — more air, aligned */}
+      <div className="flex items-center justify-between px-1">
         <div>
           <p className="text-xs text-muted">Signed in as {email}</p>
-          <p className="text-sm text-foreground">
+          <p className="text-sm text-foreground mt-1">
             <span className="font-medium">{doneCount} done today</span>
             <span className="text-muted"> · no streak shame</span>
           </p>
         </div>
         <button
           onClick={() => setRescueOpen(true)}
-          className="text-xs rounded-button border border-warning/30 bg-warning/10 px-3 py-1.5 text-foreground hover:bg-warning/15"
+          className="text-xs rounded-button border border-warning/30 bg-warning/10 px-4 py-2 text-foreground hover:bg-warning/15"
         >
           I’m stuck
         </button>
@@ -72,22 +72,22 @@ export function TodayClient({ email }: { email: string }) {
 
       <UpNext tasks={upNext} onPick={setFocusId} />
 
-      {/* Habit mock row */}
-      <Card className="p-4 flex items-center justify-between">
+      {/* Habit mock row — more padding, aligned */}
+      <Card className="p-5 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-foreground">Drink water</p>
-          <p className="text-xs text-muted">Habit · 2 today</p>
+          <p className="text-xs text-muted mt-0.5">Habit · 2 today</p>
         </div>
-        <button className="rounded-button bg-accent px-3 py-1.5 text-xs font-medium text-white">Log</button>
+        <button className="rounded-button bg-accent px-4 py-2 text-xs font-medium text-white hover:bg-accent-hover">Log</button>
       </Card>
 
       {/* Urge mock */}
-      <Card className="p-4 flex items-center justify-between border-warning/20">
+      <Card className="p-5 flex items-center justify-between border-warning/20">
         <div>
           <p className="text-sm font-medium text-foreground">Had an urge?</p>
-          <p className="text-xs text-muted">Log it calmly — get a 60-sec step, no shame.</p>
+          <p className="text-xs text-muted mt-0.5">Log it calmly — get a 60-sec step, no shame.</p>
         </div>
-        <button className="rounded-button border border-border bg-surface px-3 py-1.5 text-xs">Had urge</button>
+        <button className="rounded-button border border-border bg-surface px-4 py-2 text-xs hover:bg-accent-soft">Had urge</button>
       </Card>
 
       <RescueOverlay

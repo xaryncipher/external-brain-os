@@ -5,10 +5,15 @@
   --foreground: #2B2B28;
   --surface: #FFFFFF;
   --muted: #6B7280;
-  --accent: #7C9082;
-  --accent-hover: #6A7D70;
+  /* Sage palette — shades for depth without red */
+  --accent: #6B8F7A;        /* primary — slightly deeper sage */
+  --accent-hover: #5A7A67;
+  --accent-soft: #E8F0E8;   /* subtle fill */
+  --accent-muted: #A8C0B5;  /* borders/dots */
+  --accent-dark: #4A5E54;   /* text on accent soft */
   --warning: #D6A15C;
-  --border: #E8E6E0;
+  --border: #D6D3CC;        /* darker than #E8E6E0 — crisp alignment */
+  --border-strong: #C9C5BC;
 }
 
 @theme inline {
@@ -18,11 +23,16 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-dark: var(--accent-dark);
   --color-warning: var(--warning);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --font-sans: var(--font-inter);
-  --radius-card: 12px;
+  --radius-card: 14px;
   --radius-button: 10px;
+  --spacing-card: 24px; /* aligns to spec: 24px premium air */
 }
 
 body {
