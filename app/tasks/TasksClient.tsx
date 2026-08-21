@@ -19,7 +19,52 @@ export function TasksClient({
   const [backlog, setBacklog] = useState<TaskRow[]>(initialBacklog);
   const [newTitle, setNewTitle] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [breakdown, setBreakdown] = useState<Record<string, { steps: { title: string; estimated_minutes: number }[]; loading: boolean }>>({});
   const supabase = createClient();
+
+  async function breakDown(task: TaskRow) {
+    setBreakdown((prev) => ({ ...prev, [task.id]: { steps: [], loading: true } }));
+    try {
+      const res = await fetch("/api/breakdown-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task_id: task.id, title: task.title }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg(data.error ?? "Couldn't break down — try again?");
+        setBreakdown((prev) => ({ ...prev, [task.id]: { steps: [], loading: false } }));
+        return;
+      }
+      setBreakdown((prev) => ({ ...prev, [task.id]: { steps: data.steps, loading: false } }));
+    } catch {
+      setMsg("Couldn't break down — try again?");
+      setBreakdown((prev) => ({ ...prev, [task.id]: { steps: [], loading: false } }));
+    }
+  }
+
+  async function addSteps(task: TaskRow) {
+    const entry = breakdown[task.id];
+    if (!entry || entry.steps.length === 0) return;
+    const inserts = entry.steps.map((s, i) => ({
+      user_id: userId,
+      title: s.title,
+      status: "todo" as const,
+      is_today: task.is_today,
+      parent_task_id: task.id,
+      step_order: i,
+      estimated_minutes: s.estimated_minutes,
+    }));
+    const { error } = await supabase.from("tasks").insert(inserts);
+    if (error) { setMsg("Couldn't add steps"); return; }
+    setMsg(`Added ${entry.steps.length} tiny steps under "${task.title}".`);
+    setBreakdown((prev) => {
+      const n = { ...prev };
+      delete n[task.id];
+      return n;
+    });
+    setTimeout(() => setMsg(null), 3000);
+  }
 
   async function createTask() {
     if (!newTitle.trim()) return;
@@ -75,22 +120,47 @@ export function TasksClient({
     setBacklog((prev) => prev.filter((t) => t.id !== id));
   }
 
-  const Row = ({ task, onPrimary, primaryLabel }: { task: TaskRow; onPrimary: () => void; primaryLabel: string }) => (
-    <div className="flex items-center justify-between gap-3 rounded-card border border-border bg-surface px-5 py-4">
-      <p className="text-sm font-medium text-foreground flex-1 min-w-0">{task.title}</p>
-      <div className="flex items-center gap-2 shrink-0">
-        <Button variant="outline" onClick={onPrimary} className="text-xs px-3 py-1.5">
-          {primaryLabel}
-        </Button>
-        <button onClick={() => markDone(task.id, today.some((t) => t.id === task.id) ? "today" : "backlog")} className="rounded-button border border-accent bg-accent px-3 py-1.5 text-xs font-medium text-white">
-          Done
-        </button>
-        <button onClick={() => removeTask(task.id)} className="text-xs text-muted hover:text-foreground px-2">
-          Delete
-        </button>
+  const Row = ({ task, onPrimary, primaryLabel }: { task: TaskRow; onPrimary: () => void; primaryLabel: string }) => {
+    const bd = breakdown[task.id];
+    return (
+      <div className="rounded-card border border-border bg-surface px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-foreground flex-1 min-w-0">{task.title}</p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => breakDown(task)} disabled={!!bd?.loading} className="text-xs rounded-button border border-border px-3 py-1.5 hover:bg-accent-soft disabled:opacity-50">
+              {bd?.loading ? "…" : "Break down"}
+            </button>
+            <Button variant="outline" onClick={onPrimary} className="text-xs px-3 py-1.5">
+              {primaryLabel}
+            </Button>
+            <button onClick={() => markDone(task.id, today.some((t) => t.id === task.id) ? "today" : "backlog")} className="rounded-button border border-accent bg-accent px-3 py-1.5 text-xs font-medium text-white">
+              Done
+            </button>
+            <button onClick={() => removeTask(task.id)} className="text-xs text-muted hover:text-foreground px-2">
+              Delete
+            </button>
+          </div>
+        </div>
+        {bd && bd.steps.length > 0 && (
+          <div className="mt-3 rounded-card border border-accent-muted bg-accent-soft p-3">
+            <p className="text-xs font-semibold text-accent-dark">Tiny steps — confirm to add as subtasks</p>
+            <div className="mt-2 space-y-1.5">
+              {bd.steps.map((s, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm bg-surface rounded-button px-3 py-2 border border-border">
+                  <span className="text-foreground flex-1">{s.title}</span>
+                  <span className="text-xs text-muted">{s.estimated_minutes}m</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-2">
+              <Button variant="primary" onClick={() => addSteps(task)} className="text-xs">Add {bd.steps.length} steps</Button>
+              <Button variant="outline" onClick={() => setBreakdown((p)=>{ const n={...p}; delete n[task.id]; return n; })} className="text-xs">Dismiss</Button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">

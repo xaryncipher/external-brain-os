@@ -65,26 +65,6 @@ export function TodayClient({
     setToday((prev) => prev.map((t) => (t.id === focus.id ? { ...t, status: "in_progress" } : t)));
   }
 
-  async function handleBrainDump(items: { title: string }[]) {
-    // Phase 3 without AI: save each as backlog task (is_today false)
-    const inserts = items.map((it, i) => ({
-      user_id: userId,
-      title: it.title.slice(0, 120),
-      status: "todo" as const,
-      is_today: false,
-      step_order: i,
-    }));
-    const { error } = await supabase.from("tasks").insert(inserts);
-    if (error) {
-      alert("Couldn't save — try again?");
-      return;
-    }
-    // Also log to brain_dumps for debugging (optional)
-    try {
-      await supabase.from("brain_dumps").insert({ user_id: userId, raw_text: items.map((i) => i.title).join(", "), parsed_json: { tasks: items } });
-    } catch {}
-  }
-
   async function handleLogHabit(habitId: string) {
     const { error } = await supabase.from("habit_logs").insert({ habit_id: habitId, user_id: userId });
     if (error) {
@@ -97,11 +77,16 @@ export function TodayClient({
   }
 
   async function handleUrge() {
-    // Lightweight urge log — stores as task in Digital Behavior domain for now (Phase 3), plus future urges table
-    const { error } = await supabase.from("tasks").insert({ user_id: userId, title: "Had urge — coping step", status: "done" as const, is_today: false, domain: "Digital Behavior", completed_at: new Date().toISOString() });
-    // Even if that fails, show coping step locally
-    setUrgeMsg("60-sec step: Stand, drink water, breathe 4-4-4, then decide. No shame — you logged it.");
-    setTimeout(() => setUrgeMsg(null), 4000);
+    try {
+      const res = await fetch("/api/cope", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trigger: "general urge" }) });
+      const data = await res.json();
+      const step = data.step ?? "Stand, drink water, breathe 4-4-4 for 30s, then choose your next tiny step.";
+      setUrgeMsg(step);
+      await supabase.from("tasks").insert({ user_id: userId, title: `Had urge — ${step.slice(0,60)}`, status: "done" as const, is_today: false, domain: "Digital Behavior", completed_at: new Date().toISOString() });
+    } catch {
+      setUrgeMsg("60-sec step: Stand, drink water, breathe 4-4-4, then decide. No shame — you logged it.");
+    }
+    setTimeout(() => setUrgeMsg(null), 6000);
   }
 
   return (
@@ -122,7 +107,24 @@ export function TodayClient({
         </button>
       </div>
 
-      <BrainDump onConfirm={handleBrainDump} />
+      <BrainDump
+        userId={userId}
+        onAdded={async () => {
+          const { data } = await supabase.from("tasks").select("*").eq("user_id", userId).eq("is_today", true).neq("status", "done").is("parent_task_id", null).order("created_at", { ascending: true });
+          if (data) setToday(data as TaskRow[]);
+          const { data: habitsData } = await supabase.from("habits").select("*").eq("user_id", userId);
+          if (habitsData) {
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            const { data: logs } = await supabase.from("habit_logs").select("*").eq("user_id", userId).gte("completed_at", todayStart.toISOString());
+            const map = new Map<string, number>();
+            (logs??[]).forEach((l:any)=> map.set(l.habit_id, (map.get(l.habit_id)??0)+1));
+            setHabits(habitsData.map((h:any)=> ({...h, todayCount: map.get(h.id)??0 })));
+          }
+          const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+          const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "done").gte("completed_at", todayStart.toISOString());
+          setDoneCount(count ?? 0);
+        }}
+      />
 
       {/* Focus + UpNext or empty */}
       {today.length === 0 ? (
