@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const result = await callAI(PROMPT(parsed.data.raw_text), TriageRes, { temperature: 0.3, maxTokens: 2000 }) as any;
+    const result = await callAI(PROMPT(parsed.data.raw_text), TriageRes, { temperature: 0.3, maxTokens: 4000 }) as any;
     if ((result as any).items.filter((i: any) => i.bucket === "RIGHT NOW").length > 3) {
       let kept = 0;
       (result as any).items = (result as any).items.map((it: any) => {
