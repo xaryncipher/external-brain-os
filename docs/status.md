@@ -1,12 +1,15 @@
 # Status — ADHD Life OS
 
-**Current phase:** V1 complete + 121-list chunked triage (C) done
+**Current phase:** V1 + 121 grouping + limits done
 
 | Phase | Done | Notes |
 |---|---|---|
-| Phase 0-5 | ✓ | V1 18 routes, export, mobile, etc. |
-| Fix subtasks delete | ✓ | `cc937b1` |
-| 121-list chunked triage | ✓ 2026-08-21 | `components/today/BrainDump.tsx` 40/chunk ×3, staged RIGHT NOW/TODAY expanded, rest collapsed — `c8432cc` — triage maxTokens 4000 — build 18 routes ✓ |
+| Phase 0-5 | ✓ | 18 routes, export, etc. |
+| 121 grouping | ✓ 2026-08-21 | triage prompt groups ≥3 related → project (e.g., Learn cybersecurity) — `e33474b` |
+| Soft 150 / Hard 400 | ✓ | BrainDump 40/chunk + 600ms gap, 150 staged warning, 400 error — chunked triage handles 200 without 429 |
+| Groq fix | ✓ | gpt-oss-20b 200, Groq→Gemini fallback |
+| Delete cascade | ✓ | `cc937b1` |
 
-**Last commit:** `c8432cc`
-**Test your 121:** Paste your 121 list in BrainDump → Triage with AI (4 chunks) → see ~13 for now + 108 later → Confirm & add → check Tasks/Habits.
+**Last commit:** `e33474b`
+**Test 121 again:** Paste 121 → now groups into ~40 (projects+habits) staged 13 now + rest later, no 0-item busy if you wait 1 min between tries (rate limit).
+
