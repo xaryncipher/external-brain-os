@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { TriageReq, TriageRes } from "@/lib/validators";
-import { callGemini } from "@/lib/gemini";
+import { callAI } from "@/lib/ai";
 
 const PROMPT = (input: string) => `You are an executive-function planning assistant. Triage a huge messy list (up to 400 items).
 
@@ -43,8 +43,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const result = await callGemini(PROMPT(parsed.data.raw_text), TriageRes, { temperature: 0.3, maxTokens: 2000 }) as any;
-    // Extra guard: ensure RIGHT NOW <=3
+    const result = await callAI(PROMPT(parsed.data.raw_text), TriageRes, { temperature: 0.3, maxTokens: 2000 }) as any;
     if ((result as any).items.filter((i: any) => i.bucket === "RIGHT NOW").length > 3) {
       let kept = 0;
       (result as any).items = (result as any).items.map((it: any) => {
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
     return NextResponse.json(result);
   } catch (e: any) {
     const msg = e?.message ?? String(e);
-    if (msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured — add GEMINI_API_KEY." }, { status: 503 });
+    if (msg.includes("AI_KEY_MISSING") || msg.includes("GROQ_KEY_MISSING") || msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured — add GROQ_API_KEY (or GEMINI_API_KEY)." }, { status: 503 });
     if (msg.includes("429")) return NextResponse.json({ error: "AI is busy — try again in a minute." }, { status: 429 });
     return NextResponse.json({ error: "Couldn't process that — try again?" }, { status: 502 });
   }

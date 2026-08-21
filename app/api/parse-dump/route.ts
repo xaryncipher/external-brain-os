@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { ParseDumpReq, ParseDumpRes } from "@/lib/validators";
-import { callGemini } from "@/lib/gemini";
+import { callAI } from "@/lib/ai";
 
 const PROMPT = (input: string) => `You are an ADHD support assistant. Extract clear tasks from a messy brain dump.
 
@@ -32,17 +32,16 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const result = await callGemini(PROMPT(parsed.data.raw_text), ParseDumpRes, { temperature: 0.3, maxTokens: 1200 });
+    const result = await callAI(PROMPT(parsed.data.raw_text), ParseDumpRes, { temperature: 0.3, maxTokens: 1200 });
     return NextResponse.json(result);
   } catch (e: any) {
     const msg = e?.message ?? String(e);
-    if (msg.includes("GEMINI_KEY_MISSING")) {
-      return NextResponse.json({ error: "AI not configured — add GEMINI_API_KEY in .env.local and Vercel." }, { status: 503 });
+    if (msg.includes("AI_KEY_MISSING") || msg.includes("GROQ_KEY_MISSING") || msg.includes("GEMINI_KEY_MISSING")) {
+      return NextResponse.json({ error: "AI not configured — add GROQ_API_KEY (or GEMINI_API_KEY) in .env.local and Vercel." }, { status: 503 });
     }
-    if (msg.startsWith("GEMINI_429") || msg.includes("429")) {
+    if (msg.includes("429")) {
       return NextResponse.json({ error: "AI is busy (rate limit) — try again in a minute." }, { status: 429 });
     }
-    // Calm fallback, never raw dump
     return NextResponse.json({ error: "Couldn't process that — try again?" }, { status: 502 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { AgentReq, AgentRes } from "@/lib/validators";
-import { callGemini } from "@/lib/gemini";
+import { callAI } from "@/lib/ai";
 
 const SYSTEM = `You are the Life OS brain — calm, plain, second-person, sentence case, no exclamation, no shame, no red language. You control tasks/habits/flashcards/quizzes via tools. Autonomy: GUIDED — you may create/update but MUST set needs_confirmation=true for any delete or bulk (>5) operation so UI can show confirmation.
 
@@ -43,8 +43,7 @@ USER: """${parsed.data.message.replace(/"""/g, "'\"'")}"""
 Output:`;
 
   try {
-    const result: any = await callGemini(prompt, AgentRes, { temperature: 0.7, maxTokens: 2000 });
-    // Enforce confirmation for bulk/delete
+    const result: any = await callAI(prompt, AgentRes, { temperature: 0.7, maxTokens: 2000 });
     const hasDelete = (result.tool_calls as any[]).some((c: any) => c.name === "delete_task");
     const isBulk = (result.tool_calls as any[]).length > 5;
     if ((hasDelete || isBulk) && !result.needs_confirmation) {
@@ -53,7 +52,7 @@ Output:`;
     return NextResponse.json(result);
   } catch (e: any) {
     const msg = e?.message ?? String(e);
-    if (msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured." }, { status: 503 });
+    if (msg.includes("AI_KEY_MISSING") || msg.includes("GROQ_KEY_MISSING") || msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured." }, { status: 503 });
     if (msg.includes("429")) return NextResponse.json({ error: "AI is busy — try again." }, { status: 429 });
     return NextResponse.json({ error: "Couldn't process that — try again?" }, { status: 502 });
   }

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { BreakdownReq, BreakdownRes } from "@/lib/validators";
-import { callGemini, getBreakdownCache, setBreakdownCache } from "@/lib/gemini";
+import { callAI } from "@/lib/ai";
+import { getBreakdownCache, setBreakdownCache } from "@/lib/gemini";
 
 const PROMPT = (title: string) => `You help someone with executive dysfunction start a vague task. Break it into 2-5 micro-steps, each <5 minutes, concrete verbs, logically ordered. Never use vague verbs "plan/organize". Make first step ridiculously small.
 
@@ -33,12 +34,12 @@ export async function POST(req: Request) {
   if (cached) return NextResponse.json(cached);
 
   try {
-    const result = await callGemini(PROMPT(parsed.data.title), BreakdownRes, { temperature: 0.4, maxTokens: 800 });
+    const result = await callAI(PROMPT(parsed.data.title), BreakdownRes, { temperature: 0.4, maxTokens: 800 });
     setBreakdownCache(parsed.data.title, result);
     return NextResponse.json(result);
   } catch (e: any) {
     const msg = e?.message ?? String(e);
-    if (msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured." }, { status: 503 });
+    if (msg.includes("AI_KEY_MISSING") || msg.includes("GROQ_KEY_MISSING") || msg.includes("GEMINI_KEY_MISSING")) return NextResponse.json({ error: "AI not configured." }, { status: 503 });
     if (msg.includes("429")) return NextResponse.json({ error: "AI is busy — try again." }, { status: 429 });
     return NextResponse.json({ error: "Couldn't break down — try again?" }, { status: 502 });
   }

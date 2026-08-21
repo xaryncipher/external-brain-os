@@ -37,6 +37,7 @@ export function TodayClient({
   const [rescueIdx, setRescueIdx] = useState(0);
   const [habitMsg, setHabitMsg] = useState<string | null>(null);
   const [urgeMsg, setUrgeMsg] = useState<string | null>(null);
+  const [urgeLoading, setUrgeLoading] = useState(false);
   const supabase = createClient();
 
   const focus = today.find((t) => t.id === focusId) ?? today[0] ?? null;
@@ -77,16 +78,22 @@ export function TodayClient({
   }
 
   async function handleUrge() {
+    if (urgeLoading) return;
+    setUrgeLoading(true);
+    setUrgeMsg(null);
     try {
       const res = await fetch("/api/cope", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trigger: "general urge" }) });
-      const data = await res.json();
-      const step = data.step ?? "Stand, drink water, breathe 4-4-4 for 30s, then choose your next tiny step.";
+      const data = await res.json().catch(() => ({}));
+      const step = (data as any).step ?? "Stand, drink water, breathe 4-4-4 for 30s, then choose your next tiny step.";
       setUrgeMsg(step);
-      await supabase.from("tasks").insert({ user_id: userId, title: `Had urge — ${step.slice(0,60)}`, status: "done" as const, is_today: false, domain: "Digital Behavior", completed_at: new Date().toISOString() });
+      // lightweight log — ignore error, still shows step
+      supabase.from("tasks").insert({ user_id: userId, title: `Had urge — ${step.slice(0,60)}`, status: "done" as const, is_today: false, domain: "Digital Behavior", completed_at: new Date().toISOString() }).then(()=>{});
     } catch {
       setUrgeMsg("60-sec step: Stand, drink water, breathe 4-4-4, then decide. No shame — you logged it.");
+    } finally {
+      setUrgeLoading(false);
+      setTimeout(() => setUrgeMsg(null), 6000);
     }
-    setTimeout(() => setUrgeMsg(null), 6000);
   }
 
   return (
@@ -174,8 +181,8 @@ export function TodayClient({
           <p className="text-xs text-muted mt-0.5">Log calmly — 60-sec step, no shame.</p>
           {urgeMsg && <p className="text-xs text-foreground mt-2 bg-warning/10 border border-warning/20 rounded-button px-3 py-2">{urgeMsg}</p>}
         </div>
-        <button onClick={handleUrge} className="rounded-button border border-border bg-surface px-4 py-2 text-xs hover:bg-accent-soft ml-4 shrink-0">
-          Had urge
+        <button onClick={handleUrge} disabled={urgeLoading} className="rounded-button border border-border bg-surface px-4 py-2 text-xs hover:bg-accent-soft ml-4 shrink-0 disabled:opacity-60">
+          {urgeLoading ? "Getting step…" : "Had urge"}
         </button>
       </Card>
 

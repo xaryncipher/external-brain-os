@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { TaskRow } from "@/lib/tasks";
 import { Card } from "@/components/ui/Card";
@@ -20,7 +20,34 @@ export function TasksClient({
   const [newTitle, setNewTitle] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [breakdown, setBreakdown] = useState<Record<string, { steps: { title: string; estimated_minutes: number }[]; loading: boolean }>>({});
+  const [subtasks, setSubtasks] = useState<Record<string, TaskRow[]>>({});
   const supabase = createClient();
+
+  // Load existing subtasks for initial parents (so they don't vanish after reload)
+  useEffect(() => {
+    const parentIds = [...today, ...backlog].map((t) => t.id);
+    if (parentIds.length === 0) return;
+    supabase
+      .from("tasks")
+      .select("*")
+      .in("parent_task_id", parentIds)
+      .order("step_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (error || !data) return;
+        const map: Record<string, TaskRow[]> = {};
+        (data as TaskRow[]).forEach((row) => {
+          const pid = row.parent_task_id!;
+          if (!map[pid]) map[pid] = [];
+          map[pid].push(row);
+        });
+        setSubtasks(map);
+      });
+  }, []); // only on mount — parents from initial props
+
+  async function refreshSubtasks(parentId: string) {
+    const { data } = await supabase.from("tasks").select("*").eq("parent_task_id", parentId).order("step_order");
+    if (data) setSubtasks((prev) => ({ ...prev, [parentId]: data as TaskRow[] }));
+  }
 
   async function breakDown(task: TaskRow) {
     setBreakdown((prev) => ({ ...prev, [task.id]: { steps: [], loading: true } }));
@@ -57,7 +84,8 @@ export function TasksClient({
     }));
     const { error } = await supabase.from("tasks").insert(inserts);
     if (error) { setMsg("Couldn't add steps"); return; }
-    setMsg(`Added ${entry.steps.length} tiny steps under "${task.title}".`);
+    await refreshSubtasks(task.id);
+    setMsg(`Added ${entry.steps.length} tiny steps — now shown inline under "${task.title}".`);
     setBreakdown((prev) => {
       const n = { ...prev };
       delete n[task.id];
@@ -122,13 +150,14 @@ export function TasksClient({
 
   const Row = ({ task, onPrimary, primaryLabel }: { task: TaskRow; onPrimary: () => void; primaryLabel: string }) => {
     const bd = breakdown[task.id];
+    const subs = subtasks[task.id] ?? [];
     return (
       <div className="rounded-card border border-border bg-surface px-5 py-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-medium text-foreground flex-1 min-w-0">{task.title}</p>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={() => breakDown(task)} disabled={!!bd?.loading} className="text-xs rounded-button border border-border px-3 py-1.5 hover:bg-accent-soft disabled:opacity-50">
-              {bd?.loading ? "…" : "Break down"}
+              {bd?.loading ? "…" : subs.length ? "Re-break" : "Break down"}
             </button>
             <Button variant="outline" onClick={onPrimary} className="text-xs px-3 py-1.5">
               {primaryLabel}
@@ -156,6 +185,28 @@ export function TasksClient({
               <Button variant="primary" onClick={() => addSteps(task)} className="text-xs">Add {bd.steps.length} steps</Button>
               <Button variant="outline" onClick={() => setBreakdown((p)=>{ const n={...p}; delete n[task.id]; return n; })} className="text-xs">Dismiss</Button>
             </div>
+          </div>
+        )}
+        {subs.length > 0 && (
+          <div className="mt-3 border-t border-border/60 pt-3 space-y-2">
+            <p className="text-[11px] font-medium tracking-wide text-muted uppercase">Steps under this task — {subs.filter((s) => s.status !== "done").length} left</p>
+            {subs.map((s) => (
+              <div key={s.id} className={`flex items-center gap-2 rounded-button border px-3 py-2 text-sm ${s.status === "done" ? "bg-accent-soft border-accent-muted opacity-60 line-through" : "bg-background border-border"}`}>
+                <span className="flex-1 text-foreground">{s.title}</span>
+                <span className="text-xs text-muted">{s.estimated_minutes ?? 5}m</span>
+                {s.status !== "done" && (
+                  <button
+                    onClick={async () => {
+                      await supabase.from("tasks").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", s.id);
+                      setSubtasks((prev) => ({ ...prev, [task.id]: (prev[task.id] ?? []).map((x) => (x.id === s.id ? { ...x, status: "done" } : x)) }));
+                    }}
+                    className="rounded-button bg-accent px-2.5 py-1 text-xs text-white"
+                  >
+                    Done
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
