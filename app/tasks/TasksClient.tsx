@@ -176,11 +176,13 @@ export function TasksClient({
     const subs = subtasks[task.id] ?? [];
     return (
       <div className="rounded-card border border-border bg-surface px-5 py-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="text-sm font-medium text-foreground flex-1 min-w-0">{task.title}</p>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button onClick={() => breakDown(task)} disabled={!!bd?.loading} className="text-xs rounded-button border border-border px-3 py-1.5 hover:bg-accent-soft disabled:opacity-50">
-              {bd?.loading ? "…" : subs.length ? "Re-break" : "Break down"}
+              {bd?.loading ? (
+                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" /> Breaking…</span>
+              ) : subs.length ? "Re-break" : "Break down"}
             </button>
             <Button variant="outline" onClick={onPrimary} className="text-xs px-3 py-1.5">
               {primaryLabel}
@@ -193,7 +195,15 @@ export function TasksClient({
             </button>
           </div>
         </div>
-        {bd && bd.steps.length > 0 && (
+        {bd?.loading && (
+          <div className="mt-3 rounded-card border border-border bg-surface p-4 space-y-2 animate-pulse">
+            <div className="h-3 w-1/3 rounded bg-border" />
+            <div className="h-8 w-full rounded-button bg-border" />
+            <div className="h-8 w-full rounded-button bg-border/70" />
+            <div className="h-3 w-2/5 rounded bg-border/60" />
+          </div>
+        )}
+        {bd && bd.steps.length > 0 && !bd.loading && (
           <div className="mt-3 rounded-card border border-accent-muted bg-accent-soft p-3">
             <p className="text-xs font-semibold text-accent-dark">Tiny steps — confirm to add as subtasks</p>
             <div className="mt-2 space-y-1.5">
@@ -259,7 +269,10 @@ export function TasksClient({
         <h2 className="text-xs font-semibold tracking-widest uppercase text-muted px-1">Today — {today.length}</h2>
         <div className="mt-3 space-y-2.5">
           {today.length === 0 ? (
-            <Card className="p-6 text-center text-sm text-muted">No tasks for today — move from backlog.</Card>
+            <Card className="p-8 text-center">
+              <p className="text-sm text-muted">No tasks for today</p>
+              <p className="mt-1 text-xs text-muted">Move something from backlog when you have energy — no rush.</p>
+            </Card>
           ) : (
             today.map((t) => <Row key={t.id} task={t} onPrimary={() => moveToBacklog(t.id)} primaryLabel="To backlog" />)
           )}
@@ -270,7 +283,10 @@ export function TasksClient({
         <h2 className="text-xs font-semibold tracking-widest uppercase text-muted px-1">Backlog — {backlog.length}</h2>
         <div className="mt-3 space-y-2.5">
           {backlog.length === 0 ? (
-            <Card className="p-6 text-center text-sm text-muted">Backlog empty — brain dump will fill it.</Card>
+            <Card className="p-8 text-center">
+              <p className="text-sm text-muted">Backlog is quiet</p>
+              <p className="mt-1 text-xs text-muted">Your brain dump will fill it — no need to force.</p>
+            </Card>
           ) : (
             backlog.map((t) => <Row key={t.id} task={t} onPrimary={() => moveToToday(t.id)} primaryLabel="To today" />)
           )}

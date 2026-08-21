@@ -133,12 +133,14 @@ export function TodayClient({
         }}
       />
 
-      {/* Focus + UpNext or empty */}
+      {/* Focus + UpNext or empty — calm inviting, not blank */}
       {today.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-sm text-muted">No tasks for today</p>
-          <p className="mt-1 text-[15px] font-medium text-foreground">You are clear — add from backlog or brain dump.</p>
-          <a href="/tasks" className="mt-3 inline-block text-xs text-accent hover:text-accent-hover">
+          <div className="mx-auto h-10 w-10 rounded-full bg-accent-soft border border-accent-muted flex items-center justify-center text-accent-dark">○</div>
+          <p className="mt-3 text-sm text-muted">No tasks for today</p>
+          <p className="mt-1 text-[15px] font-medium text-foreground">You are clear — a calm start.</p>
+          <p className="mt-1 text-xs text-muted">Add one messy thought above, or pick from backlog when ready.</p>
+          <a href="/tasks" className="mt-4 inline-block rounded-button bg-accent px-4 py-2 text-xs font-medium text-white hover:bg-accent-hover">
             Go to Tasks →
           </a>
         </Card>

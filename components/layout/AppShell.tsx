@@ -23,6 +23,7 @@ export function TopNav({ active = "today", email }: { active?: string; email?: s
           {link("/today", "Today", active === "today")}
           {link("/tasks", "Tasks", active === "tasks")}
           {link("/habits", "Habits", active === "habits")}
+          {link("/settings", "Settings", active === "settings")}
           <span className="hidden sm:inline-flex items-center gap-1.5 ml-3 text-xs text-muted border-l border-border-strong pl-4">
             {email ?? ""}
           </span>
@@ -55,6 +56,7 @@ export function MobileBottomNav({ active = "today" }: { active?: string }) {
     ["/today", "Today", "◉"],
     ["/tasks", "Tasks", "☰"],
     ["/habits", "Habits", "♡"],
+    ["/settings", "Settings", "⚙"],
   ];
   return (
     <nav className="sm:hidden fixed bottom-0 left-0 right-0 border-t border-border-strong bg-surface flex justify-around py-2.5">

@@ -66,7 +66,10 @@ export function HabitsClient({ userId, initial }: { userId: string; initial: Hab
 
       <div className="space-y-3">
         {habits.length === 0 ? (
-          <Card className="p-6 text-center text-sm text-muted">No habits yet — add one above.</Card>
+          <Card className="p-8 text-center">
+            <p className="text-sm text-muted">No habits yet</p>
+            <p className="mt-1 text-xs text-muted">Add one small habit above — e.g. Drink water — and log gently.</p>
+          </Card>
         ) : (
           habits.map((h) => (
             <Card key={h.id} className="p-5 flex items-center justify-between">

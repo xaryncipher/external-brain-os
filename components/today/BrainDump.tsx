@@ -129,14 +129,28 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
             placeholder="Paste messy thoughts — e.g. call dentist, mom's bday gift, report due friday — or paste 100 items for AI triage"
             className="w-full rounded-card border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
             <Button variant="primary" onClick={handleOrganize} disabled={loading || !text.trim()} className="px-6">
-              {loading ? "Looking…" : isBulk(text) ? "Triage with AI" : "Organize with AI"}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-white/90 animate-pulse" />
+                  Looking…
+                </span>
+              ) : isBulk(text) ? "Triage with AI" : "Organize with AI"}
             </Button>
             <Button variant="outline" onClick={() => { setText(""); setParsePreview(null); setTriagePreview(null); setError(null); }}>
               Clear
             </Button>
+            {loading && <span className="text-xs text-muted animate-pulse">AI thinking — calm moment…</span>}
           </div>
+
+          {loading && (
+            <div className="rounded-card border border-border bg-surface p-4 space-y-2 animate-pulse">
+              <div className="h-3 w-3/4 rounded bg-border" />
+              <div className="h-3 w-1/2 rounded bg-border" />
+              <div className="h-3 w-2/3 rounded bg-border/70" />
+            </div>
+          )}
 
           {error && <div className="rounded-button border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-foreground">{error}</div>}
           {success && <div className="rounded-button border border-accent-muted bg-accent-soft px-3 py-2 text-sm text-accent-dark">{success}</div>}
