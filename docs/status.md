@@ -1,17 +1,12 @@
 # Status — ADHD Life OS
 
-**Current phase:** V1 complete — all 5 phases + fixes done
+**Current phase:** V1 complete + 121-list chunked triage (C) done
 
 | Phase | Done | Notes |
 |---|---|---|
-| Phase 0 scaffold | ✓ | Next 16 + Tailwind 4 + Inter + sage `#6B8F7A` — `a16d313` |
-| Phase 1 Auth | ✓ | login works — `832d521` |
-| Phase 2 UI shell | ✓ | darker border `#D6D3CC`, green shades, `ded3725` preview.html |
-| Phase 3 real data | ✓ | Today/Tasks/Habits wired — `d5647da` |
-| Phase 4 AI | ✓ fixed | Groq `openai/gpt-oss-20b` + Gemini fallback `5974fbd`, 5 routes |
-| Fix subtasks delete | ✓ | auto-cascade client + `supabase/fix-subtasks-cascade.sql` — `cc937b1` |
-| Phase 5 polish | ✓ 2026-08-21 | loading pulse, inviting empty, mobile 375px, export JSON `/settings` — `17c5c9d` — build 18 routes ✓ |
+| Phase 0-5 | ✓ | V1 18 routes, export, mobile, etc. |
+| Fix subtasks delete | ✓ | `cc937b1` |
+| 121-list chunked triage | ✓ 2026-08-21 | `components/today/BrainDump.tsx` 40/chunk ×3, staged RIGHT NOW/TODAY expanded, rest collapsed — `c8432cc` — triage maxTokens 4000 — build 18 routes ✓ |
 
-**Last commit:** `17c5c9d`
-**Next:** Vercel env check (both GROQ+GEMINI keys) → manual E2E per `docs/testing.md:5-6` → V2 roadmap (flashcards, Life Map, etc.)
-**Export:** `/settings` → Download JSON (tasks+habits+logs) — private, local.
+**Last commit:** `c8432cc`
+**Test your 121:** Paste your 121 list in BrainDump → Triage with AI (4 chunks) → see ~13 for now + 108 later → Confirm & add → check Tasks/Habits.
