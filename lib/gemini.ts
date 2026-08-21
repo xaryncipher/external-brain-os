@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+// Updated 2026-08-21: gemini-2.0-flash / 2.5-flash 404 for new API keys (free tier now requires Gemini 3)
+// Tested with user's AQ... key: v1beta/models/gemini-3.6-flash 200 with responseMimeType application/json
+const GEMINI_MODEL = "gemini-3.6-flash";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 export function safeJsonParse(text: string) {
