@@ -1,15 +1,16 @@
 # Status — ADHD Life OS
 
-**Current phase:** V1 + 121 grouping + limits done
+**Current phase:** V1 + bulk/reset done
 
 | Phase | Done | Notes |
 |---|---|---|
-| Phase 0-5 | ✓ | 18 routes, export, etc. |
-| 121 grouping | ✓ 2026-08-21 | triage prompt groups ≥3 related → project (e.g., Learn cybersecurity) — `e33474b` |
-| Soft 150 / Hard 400 | ✓ | BrainDump 40/chunk + 600ms gap, 150 staged warning, 400 error — chunked triage handles 200 without 429 |
-| Groq fix | ✓ | gpt-oss-20b 200, Groq→Gemini fallback |
-| Delete cascade | ✓ | `cc937b1` |
+| V1 0-5 | ✓ | 18 routes, export, mobile |
+| Delete fix | ✓ | subtasks cascade `cc937b1` |
+| Groq/Gemini | ✓ | gpt-oss-20b + allam fallback + Gemini 3.6 |
+| 121 chunked | ✓ | 4×40 + staged + grouping |
+| Bulk + Reset | ✓ 2026-08-21 | Tasks Today/Backlog/All + Habits All + Settings Reset (keep login, typing RESET, V2-aware) — `0203ea8` — build 18 ✓ |
+| V2 | ☐ | flashcards, quizzes, Life Map — projects stay as tasks until /life-map |
 
-**Last commit:** `e33474b`
-**Test 121 again:** Paste 121 → now groups into ~40 (projects+habits) staged 13 now + rest later, no 0-item busy if you wait 1 min between tries (rate limit).
-
+**Last commit:** `0203ea8`
+**Reset:** `/settings` → Danger zone → type RESET + tick export → Reset everything (keeps login, wipes tasks+habits+logs+dumps+V2).
+**Projects:** Added as tasks (domain) → visible in `/tasks` Backlog/Today per bucket, until V2 `/life-map`.
