@@ -177,4 +177,78 @@ const result = Schema.parse(parsed); // throws if invalid → retry once → the
 - Cache breakdown for same title for 1 hour (Map).
 - Debounce brain dump submit 1.5s so double-click doesn't burn quota.
 
+---
+
+## 8. Flashcard Extraction — From Notes to Spaced Rep Cards (`POST /api/flashcards/generate`)
+
+**Use when:** User pastes study notes, textbook highlights, or asks AI to create flashcards from a topic.
+
+```
+You are an expert at creating high-quality flashcards for spaced repetition learning.
+Extract key facts, definitions, formulas, and Q/A pairs from the input text.
+
+RULES:
+- Create ONE flashcard per distinct fact/concept — do not merge unrelated facts
+- Front: clear question or prompt (verb-first where possible, <80 chars)
+- Back: concise answer with key detail (<200 chars)
+- For formulas: front shows formula name, back shows formula + variables
+- For definitions: front asks "What is X?", back gives concise definition
+- For procedures: front asks "How to do X?", back lists 3-5 steps
+- Group related cards under a suggested deck name (from context or topic)
+- Return ONLY valid JSON, no prose, no fences
+
+SCHEMA: {"cards": [{"deck": "string", "front": "string", "back": "string"}]}
+
+EXAMPLE:
+Input: "Photosynthesis: 6CO2 + 6H2O → C6H12O6 + 6O2. Chlorophyll absorbs light. Occurs in chloroplasts."
+Output: {"cards": [
+  {"deck": "Biology", "front": "What is the chemical equation for photosynthesis?", "back": "6CO2 + 6H2O → C6H12O6 + 6O2"},
+  {"deck": "Biology", "front": "Where does photosynthesis occur?", "back": "In chloroplasts, using chlorophyll to absorb light"}
+]}
+
+Input: """{{user_input}}"""
+Output:
+```
+
+**Validator:** `CreateFlashcardRes` (`cards[].deck/front/back`)
+
+---
+
+## 9. Quiz Generation from Deck (`POST /api/quiz-from-deck`)
+
+**Use when:** User wants a quiz from an existing flashcard deck.
+
+```
+Generate a quiz from the provided flashcard deck. Mix question types.
+
+RULES:
+- Create varied question types: recall (front→back), reverse (back→front), multiple choice
+- Use existing flashcards as source — do not invent new facts
+- Mix difficulty; ~70% recall, 30% reverse/multiple choice
+- Max 20 questions per quiz
+- Return ONLY valid JSON
+
+SCHEMA: {"quiz": {"title": "string", "questions": [{"q": "string", "a": "string", "deck": "string", "flashcard_id": "string|null"}]}}
+
+EXAMPLE:
+Input: deck="Biology", flashcards=[...]
+Output: {"quiz": {"title": "Biology Quiz", "questions": [
+  {"q": "What is the chemical equation for photosynthesis?", "a": "6CO2 + 6H2O → C6H12O6 + 6O2", "deck": "Biology", "flashcard_id": "..."},
+  {"q": "Where does photosynthesis occur?", "a": "In chloroplasts", "deck": "Biology", "flashcard_id": "..."}
+]}}
+
+Input: """{{deck}}""", flashcards: """{{flashcards_json}}"""
+Output:
+```
+
+**Validator:** `QuizFromDeckRes`
+
+---
+
+## 7. Cost/Rate-Limit Guard
+
+- Single-user → <50 calls/day typical, well under 1500 free limit.
+- Cache breakdown for same title for 1 hour (Map).
+- Debounce brain dump submit 1.5s so double-click doesn't burn quota.
+
 *End — update this file when prompts change; keep validator and schema in sync with `lib/validators.ts`.*

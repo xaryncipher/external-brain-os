@@ -12,8 +12,10 @@ TOOLS:
 - create_habit(title)
 - log_habit(habit_id)
 - breakdown_task(task_id)
-- create_flashcard_draft(front, back)  // V1: draft only, preview
-- create_quiz_draft(title, questions)  // V1: draft only
+- create_flashcard(deck, front, back)
+- delete_flashcard(id)
+- review_flashcard(card_id, rating)  // rating: Again/Hard/Good/Easy
+- create_quiz_draft(title, questions)  // V1: draft only, preview
 
 RULES:
 - Use tools to act; then reply in 1-2 sentences summarizing.

@@ -70,3 +70,67 @@ export const PatchTaskReq = z.object({
   is_today: z.boolean().optional(),
   completed_at: z.string().nullable().optional(),
 });
+
+export const FlashcardReq = z.object({
+  deck: z.string().min(1).max(50).default("General"),
+  front: z.string().min(1).max(500),
+  back: z.string().min(1).max(2000),
+});
+export const FlashcardRes = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  deck: z.string(),
+  front: z.string(),
+  back: z.string(),
+  next_review_at: z.string(),
+  interval_days: z.number().int().min(1),
+  ease: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const FlashcardReviewReq = z.object({
+  card_id: z.string().uuid(),
+  rating: z.enum(["Again", "Hard", "Good", "Easy"]),
+});
+export const FlashcardReviewRes = z.object({
+  id: z.string().uuid(),
+  next_review_at: z.string(),
+  interval_days: z.number().int().min(1),
+  ease: z.number(),
+});
+
+export const CreateFlashcardReq = z.object({
+  deck: z.string().min(1).max(50).default("General"),
+  front: z.string().min(1).max(500),
+  back: z.string().min(1).max(2000),
+}).or(z.object({
+  cards: z.array(z.object({
+    deck: z.string().min(1).max(50).default("General"),
+    front: z.string().min(1).max(500),
+    back: z.string().min(1).max(2000),
+  })).min(1),
+})).or(z.object({
+  raw_text: z.string().min(1).max(20000),
+  deck: z.string().min(1).max(50).default("General").optional(),
+}));
+export const CreateFlashcardRes = z.object({
+  cards: z.array(FlashcardRes),
+});
+
+export const QuizFromDeckReq = z.object({
+  deck: z.string().min(1).max(50),
+  count: z.number().int().min(1).max(20).default(10),
+});
+export const QuizFromDeckRes = z.object({
+  quiz: z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    questions: z.array(z.object({
+      q: z.string(),
+      a: z.string(),
+      deck: z.string(),
+      flashcard_id: z.string().uuid().nullable(),
+    })),
+  }),
+});

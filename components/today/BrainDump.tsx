@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 
 type ParseTask = { title: string };
-type TriageItem = { title: string; type: "task"|"habit"|"goal"|"project"|"avoid"; bucket: "RIGHT NOW"|"TODAY"|"THIS WEEK"|"LATER"|"OPTIONAL"; reason: string };
+type TriageItem = { title: string; type: "task"|"habit"|"goal"|"project"|"avoid"|"flashcard"; bucket: "RIGHT NOW"|"TODAY"|"THIS WEEK"|"LATER"|"OPTIONAL"; reason: string };
 
 export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -166,10 +166,7 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
     if (selected.length === 0) return;
     let taskInserts: any[] = [];
     let habitTitles: string[] = [];
-    selected.forEach((it, idx) => {
-      const origIdx = triagePreview.findIndex((x, j) => triageChecks[j] && x.title === it.title && j === idx);
-      // Use triageBuckets aligned to original preview index, not filtered selected idx
-    });
+    let flashcardInserts: any[] = [];
     // Rebuild with correct bucket mapping
     const bucketsForSelected: string[] = [];
     const typesForSelected: string[] = [];
@@ -183,6 +180,10 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
       const type = typesForSelected[sIdx];
       if (type === "habit") habitTitles.push(it.title);
       else if (type === "avoid") return;
+      else if (type === "flashcard") {
+        // Flashcards will be handled separately - create via API
+        flashcardInserts.push({ user_id: userId, deck: bucket === "RIGHT NOW" ? "Right Now" : bucket === "TODAY" ? "Today" : "Learn", front: it.title.slice(0, 500), back: it.reason?.slice(0, 2000) ?? "", next_review_at: new Date().toISOString(), interval_days: 1, ease: 2.5 });
+      }
       else {
         const isToday = bucket === "RIGHT NOW" || bucket === "TODAY";
         taskInserts.push({ user_id: userId, title: it.title.slice(0,120), status: "todo" as const, is_today: isToday, domain: bucket === "RIGHT NOW" ? "Right Now" : null, step_order: taskInserts.length });
@@ -196,8 +197,12 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
       const { error } = await supabase.from("tasks").insert(taskInserts);
       if (error) { setError("Couldn't save tasks — try again?"); return; }
     }
+    if (flashcardInserts.length) {
+      const { error } = await supabase.from("flashcards").insert(flashcardInserts);
+      if (error) { setError("Couldn't save flashcards — try again?"); return; }
+    }
     const avoidCount = selected.filter((_, i) => typesForSelected[i] === "avoid").length;
-    setSuccess(`${selected.length} items triaged → ${taskInserts.length} tasks, ${habitTitles.length} habits${avoidCount?`, ${avoidCount} avoids skipped`: ""}. Check Tasks/Habits.`);
+    setSuccess(`${selected.length} items triaged → ${taskInserts.length} tasks, ${habitTitles.length} habits, ${flashcardInserts.length} flashcards${avoidCount?`, ${avoidCount} avoids skipped`: ""}. Check Tasks/Habits/Learn.`);
     setText("");
     setTriagePreview(null);
     onAdded?.();
