@@ -1,37 +1,43 @@
 # Current Task
 
-**Phase:** Polish complete — handoff to Phase 0
-**Date:** 2026-08-21
-**Owner:** non-technical, $0 free-tier only (Supabase free + Gemini free)
+**Phase:** Phase 0 done — 2026-08-21 commit a16d313
+**Owner:** non-technical, $0 free-tier only
 
-## What Just Changed
-- Merged `PROJECT_SPEC.md` (283 lines) + Master (2194 lines) → `PROJECT_SPEC.md` v2 (393 lines)
-- Created `AGENTS.md` (persistent rules), `docs/architecture.md` (folders/DB/API Zod), `docs/prompts.md` (perfected Gemini prompts with few-shot+schema), `docs/testing.md` (E2E checklist per phase), `docs/deployment.md` (copy-paste Supabase/Vercel), `docs/status.md`, `docs/decisions.md`
-- Patched `PROJECT_SPEC.md` to link docs (`AGENTS.md`, `docs/architecture.md:4`, `docs/prompts.md:1`, etc.), added validation (Zod+safeJsonParse), error matrix, deployment reference, corrected context rule.
+## What Just Changed (Phase 0)
+- Scaffolded `external-brain-os` (renamed from life-os — you said life-os taken) via `create-next-app@latest` — Next 16.3.2 + React 19 + Tailwind 4 + TS + App Router + ESLint
+- Renamed package `temp-scaffold` → `external-brain-os`
+- Installed `@supabase/supabase-js@2.112.3` + `zod@4.4.3`
+- Premium tokens: `app/globals.css:1` now has `--background #FAFAF8 --accent #7C9082 --text #2B2B28` + Inter font (`app/layout.tsx:1` switched Geist→Inter, title "External Brain — ADHD Life OS")
+- Created `.env.local.example` + patched `.gitignore:34` to allow example but ignore `.env.local` (verified `git check-ignore`)
+- Verified `npm run build` ✓ (11.1s compile, static pages 4/4), secret safety ✓ (no .env.local staged)
+- Committed 29 files as `a16d313`
 
 ## What Works
-- Spec is single source of truth, 393 lines, AI-readable, no leaked key (verified `AQ.` not in file)
-- Docs explain how a new session resumes without 2194-line paste
-- Prompts are retry/validate-guarded, cost-capped under 1500/day
+- `npm run dev` / `npm run build` green locally
+- Tailwind 4 theme inline via CSS vars, no config file needed
+- .env template ready, secrets not tracked
 
 ## What Doesn't / Known Gaps
-- No code yet — Phase 0 scaffold not run (empty git repo, only docs)
-- `preview.html` not generated (happens in Phase 2)
-- Supabase project not yet created by user (needs manual step in deployment.md:2)
+- Not yet pushed to GitHub — remote not set (you have life-os, need new name)
+- Not yet deployed to Vercel (blank deploy not verified remote)
+- Supabase project not yet created by user (blocks Phase 1)
+- `app/page.tsx` still default Next.js starter — will be replaced in Phase 2 (`/today` mock)
 
-## Tests Run
-- Verified no `AQ.` leak in `PROJECT_SPEC.md` (grep false), line counts, file structure (`docs/`, `.agent/`)
+## Tests Run (Phase 0 gate per docs/testing.md:0)
+- [x] `npm run build` passed
+- [x] `git diff --cached` had no secrets
+- [x] `.env.local` ignored, `.env.local.example` tracked
 
-## Exact Next Step
-**Phase 0 — scaffold:** Run `docs/deployment.md:4`:
-```bash
-npx create-next-app@latest . --typescript --tailwind --app --eslint --import-alias "@/*"
-npm install @supabase/supabase-js zod
-# create .env.local with 3 keys
-git add . && git commit -m "chore: scaffold Next.js + Tailwind"
-git push → Vercel import → verify blank deploy
-```
-Then update `docs/status.md` Phase 0 ✓ and run `docs/testing.md:0`.
+## Exact Next Step — Phase 1 (Supabase + Auth)
+**You (manual, 3 mins, see docs/deployment.md:2):**
+1. Create Supabase project → SQL Editor → paste `PROJECT_SPEC.md:122` → Run
+2. Auth → Users → Create user (your email/pass)
+3. Settings → API → copy URL + anon key
+
+**Then agent will (give command after you confirm Supabase done):**
+- Create `lib/supabase.ts` (anon + server clients)
+- Build `app/(auth)/login/page.tsx` + middleware redirect
+- Test `docs/testing.md:1` checklist
 
 ## Handoff For Fresh Agent
-Read `AGENTS.md` + `PROJECT_SPEC.md` + `docs/architecture.md` + `docs/prompts.md` + this file → continue Phase 0. Do not re-ask product vision — it is in docs. User is non-technical; give copy-paste commands.
+Read `AGENTS.md:1` + `PROJECT_SPEC.md:304` Phase 1 + `docs/architecture.md:4` + `docs/deployment.md:2` + this file → wait for user "Supabase done" → build login.

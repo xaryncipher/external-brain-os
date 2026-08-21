@@ -1,40 +1,37 @@
-# Session Handoff — 2026-08-21 Polish Session
+# Session Handoff — 2026-08-21 Phase 0 Done
 
-**Session type:** Plan → Build (polish spec to perfect)
-**Repo state:** No commits yet, 3 docs-tracked files + new docs. `git status` shows untracked `AGENTS.md`, `docs/`, `.agent/`, `PROJECT_SPEC.md` (modified from 283→393 lines), Master kept.
+**Session:** Build Phase 0 scaffold
+**Commit:** `a16d313` chore: Phase 0 scaffold Next.js 16 + Tailwind 4 + Inter + sage tokens + supabase/zod
+**Branch:** master (root commit, no remote yet)
 
 ## Files Changed This Session
-- `PROJECT_SPEC.md` — merged + linked docs + added validation/error matrix
-- `AGENTS.md` — new (rules for any AI agent)
-- `docs/architecture.md` — new (folders, ER diagram, Zod contracts, component contracts)
-- `docs/prompts.md` — new (5 perfected Gemini prompts, few-shot, validator)
-- `docs/testing.md` — new (E2E checklist 0→6 per phase)
-- `docs/deployment.md` — new (Supabase/Vercel copy-paste, cost guard, preview gate)
-- `docs/status.md` — new (phase checkboxes)
-- `docs/decisions.md` — new (7 decisions with rationale)
-- `.agent/current-task.md` — new (what changed, next Phase 0 command)
-- `.agent/session-handoff.md` — this file
+- Scaffold copied from `temp-scaffold` → root: `app/`, `public/`, `package.json` (renamed to external-brain-os), `next.config.ts`, `postcss.config.mjs`, `tsconfig.json`, `eslint.config.mjs`
+- Patched `app/globals.css` to premium tokens `#FAFAF8/#7C9082/#2B2B28` + `@theme inline`
+- Patched `app/layout.tsx` Geists→Inter, metadata title
+- Created `.env.local` (ignored) + `.env.local.example` + patched `.gitignore:34` with `!.env.local.example`
+- Preserved `AGENTS.md` with nextjs-agent-rules header
+- Committed 29 files, build verified `11.1s Compiled successfully`
+
+## Repo State
+- `git log --oneline -1` = `a16d313`
+- `git status` = modified `docs/status.md` + `.agent/*` unstaged (not yet committed post-handoff)
+- No remote set — user said `life-os` taken, we used `external-brain-os` locally. Need user to create new GitHub repo with different name then `git remote add origin https://github.com/YOU/external-brain-os.git` + `git push -u origin master` (or main).
+- `.env.local` correctly ignored; `.env.local.example` tracked.
 
 ## What Works
-- Spec is polished 99%: single source 393 lines, linked persistent memory, no secrets, prompts validated, extensibility explicit, preview gate before code.
-- User original leak (`AQ...`) removed from spec; security rule added.
+- Phase 0 gate passed: build green, tokens correct, deps installed.
 
 ## What Doesn't
-- App code doesn't exist (Phase 0 next)
-- Supabase project not created by user yet
-- No `preview.html` yet
+- Not pushed/deployed yet (waiting for repo name choice)
+- Supabase not yet created (user manual step for Phase 1)
+- `/today` UI not yet built (Phase 2)
 
-## Decisions Made
-- Chose polish path (single-file + docs) over immediate build to save free-tier tokens and ensure context-engineering good.
-- Chose single AI Brain with drafts for flashcards/quizzes to avoid breaking V1.
-- Kept addiction lightweight V1.
+## Next Step
+1. Commit handoff updates (`docs/status.md`, `.agent/*`) as `docs: Phase 0 handoff`
+2. User creates GitHub repo `external-brain-os` (or name they choose) → agent pushes → Vercel import → verify blank deploy.
+3. Then Phase 1: user does Supabase 3-min setup per `docs/deployment.md:2`, says "Supabase done", agent builds `/login`.
 
-## Next Step (exact command)
-Agent that resumes: `Read AGENTS.md:1 + PROJECT_SPEC.md:1 + docs/deployment.md:4 → execute Phase 0 scaffold`. User expects copy-paste `npx create-next-app@latest` command and verification of blank Vercel deploy.
+## For New AI Session — Resume
+Read `AGENTS.md:1` + `PROJECT_SPEC.md:304` Phase 1 + `docs/deployment.md:2` + `.agent/current-task.md` → check `git status` → continue.
 
-## For New AI Session — How to Resume Without Asking User
-1. `Read AGENTS.md` + `Read PROJECT_SPEC.md` + `Read docs/architecture.md` + `Read .agent/current-task.md`
-2. `git status` + `git log --oneline -5`
-3. Continue whatever phase `docs/status.md` says is next.
-
-*End — do not delete this file before Phase 0 completes.*
+*Do not delete .agent/* before Phase 1 completes.*
