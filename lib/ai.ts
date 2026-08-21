@@ -18,25 +18,27 @@ export async function callAI(
 
   let lastErr: unknown;
 
-  // Try Groq first if available
+  // Try Groq first if available — with 1.5s backoff on 429 before Gemini fallback (avoids burst 4×40 hitting 30 RPM)
   if (hasGroq) {
     try {
       return await callGroq(prompt, schema, { temperature: opts.temperature, maxTokens: opts.maxTokens });
     } catch (e: any) {
       lastErr = e;
       const msg = String(e?.message ?? e);
-      // If Groq rate-limited and Gemini exists, fall back
       const isRate = msg.includes("429") || msg.includes("GROQ_429");
-      if (!isRate && !msg.includes("GROQ_KEY_MISSING")) {
-        // For non-rate errors, still try fallback if Gemini exists (except JSON parse which we retry via caller)
-        if (hasGemini) {
-          try {
-            return await callGemini(prompt, schema, { temperature: opts.temperature, maxTokens: opts.maxTokens, retries: opts.retries ?? 1 });
-          } catch (ge: any) {
-            lastErr = ge;
-          }
+      if (isRate) {
+        // Wait 1.5s and retry Groq once (often burst window clears)
+        await new Promise((r) => setTimeout(r, 1500));
+        try {
+          return await callGroq(prompt, schema, { temperature: opts.temperature, maxTokens: opts.maxTokens });
+        } catch (re: any) {
+          lastErr = re;
         }
-      } else if (isRate && hasGemini) {
+      }
+      // After Groq retry (or if non-rate error), fall back to Gemini if available
+      const stillRate = String((lastErr as any)?.message ?? lastErr).includes("429");
+      const isNotKeyMissing = !String((lastErr as any)?.message ?? lastErr).includes("GROQ_KEY_MISSING");
+      if (isNotKeyMissing && hasGemini) {
         try {
           return await callGemini(prompt, schema, { temperature: opts.temperature, maxTokens: opts.maxTokens, retries: opts.retries ?? 1 });
         } catch (ge: any) {

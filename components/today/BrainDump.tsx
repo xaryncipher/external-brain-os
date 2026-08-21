@@ -100,7 +100,7 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
           }
           const items = (data.items as TriageItem[]) ?? [];
           merged = merged.concat(items);
-          if (idx < chunks.length - 1) await new Promise((r) => setTimeout(r, 650));
+          if (idx < chunks.length - 1) await new Promise((r) => setTimeout(r, 1500));
         }
 
         // Dedupe by normalized title
@@ -123,6 +123,12 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
 
         // Cap total to 150 for UI sanity but allow 121
         const finalItems = guarded.slice(0, 150);
+        if (finalItems.length === 0) {
+          if (!error) setError("AI returned no items — try a smaller paste or wait 60s and retry.");
+          setLoading(false);
+          setLoadingMsg(null);
+          return;
+        }
         setTriagePreview(finalItems);
         setTriageChecks(finalItems.map(() => true));
         setTriageBuckets(finalItems.map((it) => it.bucket));
@@ -328,7 +334,9 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
               )}
 
               <div className="mt-4 flex gap-3">
-                <Button variant="primary" onClick={confirmTriage}>Confirm & add {triagePreview.filter((_,i)=>triageChecks[i]).length} items</Button>
+                <Button variant="primary" onClick={confirmTriage} disabled={triagePreview.filter((_,i)=>triageChecks[i]).length===0}>
+                  Confirm & add {triagePreview.filter((_,i)=>triageChecks[i]).length} items
+                </Button>
                 <Button variant="outline" onClick={() => setTriagePreview(null)}>Dismiss</Button>
               </div>
               <p className="text-xs text-muted mt-2">Tip: Uncheck “avoid” items like “No Instagram” if you don’t want them saved — they’re shown to help you see what to avoid.</p>
