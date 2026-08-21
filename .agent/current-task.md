@@ -1,43 +1,39 @@
 # Current Task
 
-**Phase:** Phase 0 done — 2026-08-21 commit a16d313
-**Owner:** non-technical, $0 free-tier only
+**Phase:** Phase 1 code done — 2026-08-21 commit 832d521, pushed to origin/main (external-brain-os)
+**Owner:** non-technical, $0 free-tier
 
-## What Just Changed (Phase 0)
-- Scaffolded `external-brain-os` (renamed from life-os — you said life-os taken) via `create-next-app@latest` — Next 16.3.2 + React 19 + Tailwind 4 + TS + App Router + ESLint
-- Renamed package `temp-scaffold` → `external-brain-os`
-- Installed `@supabase/supabase-js@2.112.3` + `zod@4.4.3`
-- Premium tokens: `app/globals.css:1` now has `--background #FAFAF8 --accent #7C9082 --text #2B2B28` + Inter font (`app/layout.tsx:1` switched Geist→Inter, title "External Brain — ADHD Life OS")
-- Created `.env.local.example` + patched `.gitignore:34` to allow example but ignore `.env.local` (verified `git check-ignore`)
-- Verified `npm run build` ✓ (11.1s compile, static pages 4/4), secret safety ✓ (no .env.local staged)
-- Committed 29 files as `a16d313`
+## What Just Changed (Phase 1)
+- Created `lib/supabase/client.ts` (browser) + `lib/supabase/server.ts` (server with cookies) + `lib/supabase.ts` re-export — fixes next/headers error `PROJECT_SPEC.md` would have had with single file
+- Installed `@supabase/ssr`
+- Created `lib/validators.ts` with Zod schemas `ParseDumpReq/Res` etc per `docs/architecture.md:4`
+- Built `app/login/page.tsx:1` — calm premium card (sage accent, 12px, Inter, no red), email/pass, checks placeholder env → friendly "Supabase not configured", else `signInWithPassword` → redirect `/today`, calm error, pulse loading
+- Built `app/today/page.tsx:1` — server guard `getUser()` → redirect `/login` if null, else shows placeholder shell + sign-out form (Phase 2 will replace with FocusCard)
+- Created `middleware.ts:1` — uses `@supabase/ssr` createServerClient, handles placeholder env, redirects unauth → /login and auth → /today, handles cookies. Note: Next 16 warns to use `proxy` — still works, can migrate later.
+- Verified `npm run build` ✓ (6/6 pages, no TS error), committed 9 files, pushed to `https://github.com/xaryncipher/external-brain-os.git` main for A+B.
 
 ## What Works
-- `npm run dev` / `npm run build` green locally
-- Tailwind 4 theme inline via CSS vars, no config file needed
-- .env template ready, secrets not tracked
+- Build green locally and remote (pushed).
+- Login UI renders at `/login` even with placeholder env (shows config message instead of crash).
 
-## What Doesn't / Known Gaps
-- Not yet pushed to GitHub — remote not set (you have life-os, need new name)
-- Not yet deployed to Vercel (blank deploy not verified remote)
-- Supabase project not yet created by user (blocks Phase 1)
-- `app/page.tsx` still default Next.js starter — will be replaced in Phase 2 (`/today` mock)
+## What Doesn't / Needs User
+- `.env.local` still has placeholders `https://YOUR_PROJECT...` → login will show "Supabase not configured" until you fill real values.
+- Supabase tables: you said "Supabase done" but need to verify SQL `PROJECT_SPEC.md:122` actually Ran (green Success). If not, login will succeed but `today` data won't persist later.
+- Vercel env not yet set — blank deploy will also show same config message until you add env there.
 
-## Tests Run (Phase 0 gate per docs/testing.md:0)
+## Tests Run (Phase 1 partial)
 - [x] `npm run build` passed
-- [x] `git diff --cached` had no secrets
-- [x] `.env.local` ignored, `.env.local.example` tracked
+- [x] `git diff --cached` no secrets
+- [ ] Manual login test pending — blocked by placeholder env
+- [ ] RLS check pending — needs real Supabase user
 
-## Exact Next Step — Phase 1 (Supabase + Auth)
-**You (manual, 3 mins, see docs/deployment.md:2):**
-1. Create Supabase project → SQL Editor → paste `PROJECT_SPEC.md:122` → Run
-2. Auth → Users → Create user (your email/pass)
-3. Settings → API → copy URL + anon key
+## Exact Next Step — YOU (5 mins, no code):
+1. Supabase dashboard → Settings → API → copy **Project URL** and **anon public** key
+2. On your computer, open `C:\Users\X\Downloads\project\.env.local` in Notepad → replace `YOUR_PROJECT...` with real URL, `YOUR_ANON_KEY` with real anon key, `AIzaYourNewKey` with your new Gemini key (regenerated, per security note)
+3. Save → run `npm run dev` → open `http://localhost:3000/login` → login with your Supabase user email/pass you created → should land on `/today` showing your email
+4. If that works, go to Vercel → Project `external-brain-os` → Settings → Environment Variables → add same 3 keys → Redeploy
 
-**Then agent will (give command after you confirm Supabase done):**
-- Create `lib/supabase.ts` (anon + server clients)
-- Build `app/(auth)/login/page.tsx` + middleware redirect
-- Test `docs/testing.md:1` checklist
+Then say "login works" and I will start Phase 2 (premium UI shell + preview.html gate).
 
 ## Handoff For Fresh Agent
-Read `AGENTS.md:1` + `PROJECT_SPEC.md:304` Phase 1 + `docs/architecture.md:4` + `docs/deployment.md:2` + this file → wait for user "Supabase done" → build login.
+Read `AGENTS.md` + `PROJECT_SPEC.md:304` Phase 1-2 + `docs/testing.md:1` + this file. Wait for user "login works" with real env before Phase 2.
