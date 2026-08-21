@@ -11,7 +11,20 @@ export function HabitsClient({ userId, initial }: { userId: string; initial: Hab
   const [habits, setHabits] = useState<Habit[]>(initial);
   const [title, setTitle] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [bulkInput, setBulkInput] = useState("");
   const supabase = createClient();
+
+  async function deleteAllHabits() {
+    if (bulkInput !== "DELETE") { setMsg('Type DELETE to confirm'); return; }
+    // habit_logs cascade via habits FK, but delete logs first for safety on old DB
+    await supabase.from("habit_logs").delete().eq("user_id", userId);
+    const { error } = await supabase.from("habits").delete().eq("user_id", userId);
+    if (error) { setMsg(`Couldn't delete: ${error.message}`); return; }
+    setHabits([]);
+    setBulkInput("");
+    setMsg(`Deleted all habits (${initial.length} + current).`);
+    setTimeout(() => setMsg(null), 3000);
+  }
 
   async function createHabit() {
     if (!title.trim()) return;
@@ -62,6 +75,16 @@ export function HabitsClient({ userId, initial }: { userId: string; initial: Hab
           </Button>
         </div>
         {msg && <p className="text-xs text-muted mt-2">{msg}</p>}
+      </Card>
+
+      <Card className="p-5 border-warning/20">
+        <p className="text-sm font-semibold tracking-tight">Bulk delete habits</p>
+        <p className="text-xs text-muted mt-1">Deletes all habits and their logs. Projects stay as tasks. Type DELETE to confirm.</p>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-xs text-muted w-24">ALL ({habits.length})</span>
+          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
+          <Button variant="outline" onClick={deleteAllHabits} className="text-xs px-3 py-1.5 bg-warning/10 border-warning/30">Delete ALL habits</Button>
+        </div>
       </Card>
 
       <div className="space-y-3">

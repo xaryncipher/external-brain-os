@@ -2,6 +2,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { TopNav, MobileBottomNav } from "@/components/layout/AppShell";
 import { ExportClient } from "./ExportClient";
+import { ResetClient } from "./ResetClient";
 import { Card } from "@/components/ui/Card";
 
 export default async function SettingsPage() {
@@ -39,9 +40,11 @@ export default async function SettingsPage() {
 
         <ExportClient userId={user.id} email={user.email ?? ""} />
 
+        <ResetClient userId={user.id} />
+
         <Card className="p-6">
           <p className="text-sm font-medium">About</p>
-          <p className="text-xs text-muted mt-1">External Brain — ADHD Life OS. V1 focuses on Today, Tasks, Habits + AI. Your data stays private via Supabase RLS.</p>
+          <p className="text-xs text-muted mt-1">External Brain — ADHD Life OS. V1 focuses on Today, Tasks, Habits + AI (projects are tasks until V2 Life Map). Your data stays private via Supabase RLS.</p>
           <p className="text-xs text-muted mt-2">Free tier: Supabase 500MB, Vercel 100GB, Groq + Gemini free. No hidden charges.</p>
         </Card>
       </main>

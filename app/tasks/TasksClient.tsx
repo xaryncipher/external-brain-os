@@ -143,7 +143,6 @@ export function TasksClient({
   async function removeTask(id: string) {
     const hasSubs = (subtasks[id]?.length ?? 0) > 0;
     if (!confirm(hasSubs ? `Delete this task and its ${subtasks[id].length} subtasks?` : "Delete this task?")) return;
-    // Delete subtasks first (covers old DB without CASCADE), then parent — auto-delete with CASCADE after migration too
     const { error: subErr } = await supabase.from("tasks").delete().eq("parent_task_id", id).eq("user_id", userId);
     if (subErr) {
       setMsg(`Couldn't delete subtasks: ${subErr.message}`);
@@ -161,7 +160,6 @@ export function TasksClient({
       delete n[id];
       return n;
     });
-    // Also remove from subtasks lists where this task was itself a subtask (rare)
     setSubtasks((prev) => {
       const n: Record<string, TaskRow[]> = {};
       for (const [pid, list] of Object.entries(prev)) {
@@ -169,6 +167,59 @@ export function TasksClient({
       }
       return n;
     });
+  }
+
+  const [bulkTodayInput, setBulkTodayInput] = useState("");
+  const [bulkBacklogInput, setBulkBacklogInput] = useState("");
+  const [bulkAllInput, setBulkAllInput] = useState("");
+
+  async function deleteAllToday() {
+    if (bulkTodayInput !== "DELETE") { setMsg('Type DELETE to confirm'); return; }
+    // Delete subtasks of today parents first (FK-safe even without CASCADE)
+    const todayIds = today.map((t) => t.id);
+    if (todayIds.length) await supabase.from("tasks").delete().in("parent_task_id", todayIds).eq("user_id", userId);
+    const { error } = await supabase.from("tasks").delete().eq("user_id", userId).eq("is_today", true).is("parent_task_id", null);
+    if (error) { setMsg(`Couldn't delete Today: ${error.message}`); return; }
+    setToday([]);
+    setSubtasks((prev) => {
+      const n = { ...prev };
+      todayIds.forEach((id) => delete n[id]);
+      return n;
+    });
+    setBulkTodayInput("");
+    setMsg(`Deleted all Today tasks (${today.length}).`);
+    setTimeout(() => setMsg(null), 3000);
+  }
+
+  async function deleteAllBacklog() {
+    if (bulkBacklogInput !== "DELETE") { setMsg('Type DELETE to confirm'); return; }
+    const backlogIds = backlog.map((t) => t.id);
+    if (backlogIds.length) await supabase.from("tasks").delete().in("parent_task_id", backlogIds).eq("user_id", userId);
+    const { error } = await supabase.from("tasks").delete().eq("user_id", userId).eq("is_today", false).is("parent_task_id", null);
+    if (error) { setMsg(`Couldn't delete Backlog: ${error.message}`); return; }
+    setBacklog([]);
+    setSubtasks((prev) => {
+      const n = { ...prev };
+      backlogIds.forEach((id) => delete n[id]);
+      return n;
+    });
+    setBulkBacklogInput("");
+    setMsg(`Deleted all Backlog tasks (${backlog.length}).`);
+    setTimeout(() => setMsg(null), 3000);
+  }
+
+  async function deleteAllTasks() {
+    if (bulkAllInput !== "DELETE") { setMsg('Type DELETE to confirm'); return; }
+    // Delete subtasks first (covers old DB)
+    await supabase.from("tasks").delete().eq("user_id", userId).not("parent_task_id", "is", null);
+    const { error } = await supabase.from("tasks").delete().eq("user_id", userId);
+    if (error) { setMsg(`Couldn't delete all: ${error.message}`); return; }
+    setToday([]);
+    setBacklog([]);
+    setSubtasks({});
+    setBulkAllInput("");
+    setMsg("Deleted all tasks and steps.");
+    setTimeout(() => setMsg(null), 3000);
   }
 
   const Row = ({ task, onPrimary, primaryLabel }: { task: TaskRow; onPrimary: () => void; primaryLabel: string }) => {
@@ -263,6 +314,28 @@ export function TasksClient({
           </Button>
         </div>
         {msg && <p className="mt-2 text-xs text-accent-dark bg-accent-soft border border-accent-muted rounded-button px-3 py-2">{msg}</p>}
+      </Card>
+
+      <Card className="p-5 border-warning/20">
+        <p className="text-sm font-semibold tracking-tight">Bulk delete tasks</p>
+        <p className="text-xs text-muted mt-1">Projects are tasks — these will delete them too (with steps). Type DELETE to confirm.</p>
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted w-28">Today ({today.length})</span>
+            <input value={bulkTodayInput} onChange={(e) => setBulkTodayInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
+            <Button variant="outline" onClick={deleteAllToday} className="text-xs px-3 py-1.5 border-warning/30">Delete Today</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted w-28">Backlog ({backlog.length})</span>
+            <input value={bulkBacklogInput} onChange={(e) => setBulkBacklogInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
+            <Button variant="outline" onClick={deleteAllBacklog} className="text-xs px-3 py-1.5 border-warning/30">Delete Backlog</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted w-28">ALL ({today.length + backlog.length})</span>
+            <input value={bulkAllInput} onChange={(e) => setBulkAllInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
+            <Button variant="outline" onClick={deleteAllTasks} className="text-xs px-3 py-1.5 bg-warning/10 border-warning/30">Delete ALL</Button>
+          </div>
+        </div>
       </Card>
 
       <div>
