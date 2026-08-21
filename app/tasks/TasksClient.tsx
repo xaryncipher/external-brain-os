@@ -141,11 +141,34 @@ export function TasksClient({
   }
 
   async function removeTask(id: string) {
-    if (!confirm("Delete this task?")) return;
+    const hasSubs = (subtasks[id]?.length ?? 0) > 0;
+    if (!confirm(hasSubs ? `Delete this task and its ${subtasks[id].length} subtasks?` : "Delete this task?")) return;
+    // Delete subtasks first (covers old DB without CASCADE), then parent — auto-delete with CASCADE after migration too
+    const { error: subErr } = await supabase.from("tasks").delete().eq("parent_task_id", id).eq("user_id", userId);
+    if (subErr) {
+      setMsg(`Couldn't delete subtasks: ${subErr.message}`);
+      return;
+    }
     const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", userId);
-    if (error) return alert("Couldn't delete");
+    if (error) {
+      setMsg(`Couldn't delete: ${error.message}`);
+      return;
+    }
     setToday((prev) => prev.filter((t) => t.id !== id));
     setBacklog((prev) => prev.filter((t) => t.id !== id));
+    setSubtasks((prev) => {
+      const n = { ...prev };
+      delete n[id];
+      return n;
+    });
+    // Also remove from subtasks lists where this task was itself a subtask (rare)
+    setSubtasks((prev) => {
+      const n: Record<string, TaskRow[]> = {};
+      for (const [pid, list] of Object.entries(prev)) {
+        n[pid] = list.filter((s) => s.id !== id);
+      }
+      return n;
+    });
   }
 
   const Row = ({ task, onPrimary, primaryLabel }: { task: TaskRow; onPrimary: () => void; primaryLabel: string }) => {
