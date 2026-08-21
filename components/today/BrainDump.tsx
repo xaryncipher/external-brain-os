@@ -64,8 +64,23 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
         setParsePreview((data.tasks as ParseTask[]).slice(0, 30));
         try { await supabase.from("brain_dumps").insert({ user_id: userId, raw_text: text.slice(0, 5000), parsed_json: data }); } catch {}
       } else {
-        // Chunked triage for 121+ items — Groq primary is fast (0.09s per 40), keeps under 30 RPM
-        const chunks = chunkLines(text, 40);
+        // Soft 150 / Hard 400 guard — per your approved recommendation
+        const lineCount = text.split("\n").filter((l) => l.trim()).length;
+        if (lineCount > 400) {
+          setError(`That's a lot — ${lineCount} lines pasted. Max 400 per dump. Please split into 2 pastes (e.g., 200 + 200).`);
+          setLoading(false);
+          return;
+        }
+        let softNote: string | null = null;
+        let effectiveText = text;
+        if (lineCount > 150) {
+          softNote = `You pasted ${lineCount} — we'll triage first 150 now for calm review. After confirming, paste remaining ${lineCount - 150}.`;
+          const first150 = text.split("\n").filter((l) => l.trim()).slice(0, 150).join("\n");
+          effectiveText = first150;
+        }
+        if (softNote) setError(softNote); // show as calm info (not error style, but reuse)
+        // Chunked triage — 40 per chunk, 600ms gap to stay under 30 RPM burst
+        const chunks = chunkLines(effectiveText, 40);
         let merged: TriageItem[] = [];
         for (let idx = 0; idx < chunks.length; idx++) {
           setLoadingMsg(`AI triaging chunk ${idx + 1}/${chunks.length}… calm moment…`);
@@ -76,7 +91,6 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
           });
           const data = await res.json();
           if (!res.ok) {
-            // If one chunk fails with 429, keep prior chunks and show partial with warning
             if (res.status === 429) {
               setError(`Groq busy on chunk ${idx + 1} — got ${merged.length} items so far. Try Confirm & add those, then re-paste remaining?`);
               break;
@@ -86,6 +100,7 @@ export function BrainDump({ userId, onAdded }: { userId: string; onAdded?: () =>
           }
           const items = (data.items as TriageItem[]) ?? [];
           merged = merged.concat(items);
+          if (idx < chunks.length - 1) await new Promise((r) => setTimeout(r, 650));
         }
 
         // Dedupe by normalized title

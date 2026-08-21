@@ -13,6 +13,7 @@ For each distinct item, output:
 
 RULES:
 - Group duplicates/related; never list same idea twice
+- GROUPING: If ≥3 items share domain/verb (e.g., Learn python + TryHackMe + HackTheBox + CEH + offensive security → project "Learn cybersecurity — Python, labs, CEH"), create ONE project item type=project with bucket THIS WEEK and reason "groups 5 related skills" instead of 5 separate tasks. Habits stay separate (don't group Brush teeth + Pray). Avoids stay separate.
 - Limit RIGHT NOW to 3 most leverage items; rest to TODAY/THIS WEEK
 - If item could be habit, mark habit; if fact to memorize, keep as task but note in reason "flashcard candidate"
 - Detect overload: if >20 items, prioritize and mark rest LATER/OPTIONAL
@@ -27,6 +28,10 @@ Output: {"items":[
   {"title":"Complete Python intro lesson","type":"task","bucket":"THIS WEEK","reason":"learning, not urgent today"},
   {"title":"Limit late-night phone use","type":"avoid","bucket":"TODAY","reason":"protects sleep, avoid trigger"}
 ]}
+
+GROUPING EXAMPLE:
+Input: "Learn python, Do TryHackMe, Do HackTheBox, Learn CEH, Learn offensive security, Learn penetration testing"
+Output: {"items":[{"title":"Learn cybersecurity — Python, TryHackMe, HackTheBox, CEH","type":"project","bucket":"THIS WEEK","reason":"groups 5 related skills"}]}
 
 Input: """${input.replace(/"""/g, "'\"'")}"""
 Output:`;
