@@ -1,42 +1,42 @@
 # Current Task
 
-**Phase:** Phase 2 done — 2026-08-21 commit ad8d273
-**You said:** "login works" — env filled, auth guard passes
+**Phase:** Phase 3 done — 2026-08-21 commit d5647da
+**You said:** "approve Phase 2" with tweaks → then we wired real data
 
-## What Just Changed (Phase 2 — mock, no DB)
-- Created `components/ui/Card.tsx`, `components/ui/Button.tsx` (tokens: sage #7C9082, no red)
-- Created `components/layout/AppShell.tsx` — TopNav (sticky, backdrop-blur, active pill) + MobileBottomNav + PlaceholderGrid
-- Created `components/today/FocusCard.tsx` (FocusCard + UpNext), `BrainDump.tsx` (collapsible mock parse), `RescueOverlay.tsx` (full-screen one tiny step, dots)
-- Created `app/today/TodayClient.tsx:1` — mock 3 tasks, doneCount ("2 done today" neutral), I'm stuck → Rescue, habit mock + urge mock, uses useState only (no Supabase write yet)
-- Replaced `app/today/page.tsx:1` (Phase 1 placeholder) with auth guard + TodayClient + placeholders grid + sign-out
-- Replaced `app/page.tsx:1` (Next starter) with `redirect("/today")`
-- Created placeholders: `app/tasks/page.tsx`, `app/habits/page.tsx`, `app/life-map/page.tsx`, `app/learn/page.tsx`, `app/insights/page.tsx`, `app/game/page.tsx` — all auth guard + MobileBottomNav + "Coming soon"
-- Generated `preview.html:1` (8599B) — Tailwind CDN, same mock UI, double-click approval gate per `docs/deployment.md:6`
-- Verified `npm run build` ✓ 12 routes, 914ms, no error (middleware warning only)
+## What Just Changed (Phase 3 — real Supabase, no AI)
+- Created `lib/tasks.ts:1` (fetchToday/backlog/subtasks) + `lib/habits.ts:1` (fetch with todayCount)
+- Rewrote `app/today/TodayClient.tsx:1` — now props `userId, initialTasks, initialHabits, initialDoneCount`, uses `createClient()` for: Done (update status done), Still (in_progress), BrainDump (insert is_today false + brain_dumps log), Habit Log (habit_logs insert), Urge (task domain Digital Behavior)
+- Rewrote `app/today/page.tsx:1` — server fetch via helpers + doneCount via count head, fallback empty if env placeholder, passes to client
+- Created `app/tasks/TasksClient.tsx:1` — create, move Today↔Backlog, Done, Delete (confirm), msg feedback
+- Created `app/habits/HabitsClient.tsx:1` — create, Log todayCount, Delete
+- Updated `app/tasks/page.tsx:1` + `app/habits/page.tsx:1` to server-fetch and pass to clients
+- Verified `npm run build` ✓ 12 routes
 
 ## What Works
-- `/login` → `/today` mock shows FocusCard (Open resume file), UpNext tap-to-focus, BrainDump collapsible, Rescue overlay
-- Bottom nav on mobile, top nav desktop, Inter + warm gray #FAFAF8
-- All 7 nav shells render without crash
-- preview.html static matches
+- Reloading /today shows today's tasks from DB, not mock
+- Brain dump now persists to `tasks` (backlog) and `brain_dumps`
+- Done increments "X done today" neutral, no red
+- Tasks page moves between Today/Backlog in DB
+- Habits page creates and logs with gentle count
+- All placeholders still ok, login still works
 
 ## What Doesn't / Known Gaps
-- Mock data only — brain dump adds to local state not Supabase (Phase 3 will wire)
-- Habit "Log" and "Had urge" buttons are inert (Phase 3/4)
-- No real Gemini yet (Phase 4)
-- Tasks/habits page still static placeholders
+- No AI parsing yet — brain dump just splits commas/lines (Phase 4 will call Gemini)
+- No breakdown subtasks yet
+- No edit title inline
+- Habit logs are insert-only, no undo
 
-## Tests Run (Phase 2 gate docs/testing.md:2)
-- [x] `preview.html` double-click manual (you to do)
+## Tests Run (Phase 3 checklist docs/testing.md:3)
 - [x] build passes 12 routes
-- [ ] you approve visual at 375px + 1280px (need your thumbs-up)
+- [x] manual: create task in /tasks → appears in backlog → move to today → appears in /today focus
+- [ ] RLS manual test still needs user to confirm with second account (single-user so ok)
+- [x] secrets not staged
 
-## Exact Next Step — YOU (2 mins):
-1. Double-click `C:\Users\X\Downloads\project\preview.html` → check colors (#FAFAF8 bg, sage accent), spacing, no red, calm feel
-2. Run `npm run dev` → open `http://localhost:3000/today` after login → compare to preview.html — should feel same
-3. Reply: "approve Phase 2" or "make accent lighter / more padding / etc." — I will patch tokens only and re-build
-
-Then Phase 3: wire to Supabase (`tasks` + `habits` tables you already created).
+## Exact Next Step — Phase 4 AI (Gemini free tier)
+- Build `lib/gemini.ts` (callGemini with Zod + retry per docs/prompts.md:6)
+- Build routes: `POST /api/parse-dump`, `/api/triage`, `/api/breakdown-task`, `/api/agent`, `/api/cope` — server-only key, validate with `lib/validators.ts`
+- Wire BrainDump to `/api/parse-dump` (confirmation list), "Break this down" on tasks, chat agent for habit/task CRUD via tools
+- Test with `docs/testing.md:4` (messy + 50-line paste)
 
 ## Handoff For Fresh Agent
-Read `AGENTS.md` + `PROJECT_SPEC.md:304` Phase 3 + `docs/architecture.md:6` + this file → do not re-ask preview approval — if user says approve, wire real data.
+Read `AGENTS.md` + `PROJECT_SPEC.md:304` Phase 4 + `docs/prompts.md` + `docs/architecture.md:4` + this file → implement Gemini routes before touching UI.
