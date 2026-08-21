@@ -25,7 +25,7 @@ create table quizzes (
 );
 
 -- Indexes for common queries
-create index idx_flashcards_user_due on flashcards (user_id, next_review_at) where next_review_at <= now();
+create index idx_flashcards_user_due on flashcards (user_id, next_review_at);
 create index idx_flashcards_user_deck on flashcards (user_id, deck);
 create index idx_quizzes_user on quizzes (user_id);
 
