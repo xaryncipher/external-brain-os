@@ -12,6 +12,7 @@ export function HabitsClient({ userId, initial }: { userId: string; initial: Hab
   const [title, setTitle] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [bulkInput, setBulkInput] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
   const supabase = createClient();
 
   async function deleteAllHabits() {
@@ -78,13 +79,20 @@ export function HabitsClient({ userId, initial }: { userId: string; initial: Hab
       </Card>
 
       <Card className="p-5 border-warning/20">
-        <p className="text-sm font-semibold tracking-tight">Bulk delete habits</p>
-        <p className="text-xs text-muted mt-1">Deletes all habits and their logs. Projects stay as tasks. Type DELETE to confirm.</p>
-        <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs text-muted w-24">ALL ({habits.length})</span>
-          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
-          <Button variant="outline" onClick={deleteAllHabits} className="text-xs px-3 py-1.5 bg-warning/10 border-warning/30">Delete ALL habits</Button>
-        </div>
+        <button onClick={() => setBulkOpen((v) => !v)} className="w-full flex items-center justify-between text-left">
+          <div>
+            <p className="text-sm font-semibold tracking-tight">Bulk delete habits</p>
+            <p className="text-xs text-muted mt-1">Deletes all habits and their logs. Projects stay as tasks. Type DELETE to confirm.</p>
+          </div>
+          <span className="text-xs text-muted border border-border rounded-button px-3 py-1.5 bg-background ml-3 shrink-0">{bulkOpen ? "Hide" : "Show"}</span>
+        </button>
+        {bulkOpen && (
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
+            <span className="text-xs text-muted sm:w-24 w-full">ALL ({habits.length})</span>
+            <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="DELETE" className="flex-1 w-full rounded-button border border-border bg-background px-3 py-2 text-xs" />
+            <Button variant="outline" onClick={deleteAllHabits} className="w-full sm:w-auto text-xs px-3 py-2 bg-warning/10 border-warning/30">Delete ALL habits</Button>
+          </div>
+        )}
       </Card>
 
       <div className="space-y-3">

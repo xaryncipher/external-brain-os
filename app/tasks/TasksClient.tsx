@@ -172,6 +172,7 @@ export function TasksClient({
   const [bulkTodayInput, setBulkTodayInput] = useState("");
   const [bulkBacklogInput, setBulkBacklogInput] = useState("");
   const [bulkAllInput, setBulkAllInput] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   async function deleteAllToday() {
     if (bulkTodayInput !== "DELETE") { setMsg('Type DELETE to confirm'); return; }
@@ -317,25 +318,37 @@ export function TasksClient({
       </Card>
 
       <Card className="p-5 border-warning/20">
-        <p className="text-sm font-semibold tracking-tight">Bulk delete tasks</p>
-        <p className="text-xs text-muted mt-1">Projects are tasks — these will delete them too (with steps). Type DELETE to confirm.</p>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted w-28">Today ({today.length})</span>
-            <input value={bulkTodayInput} onChange={(e) => setBulkTodayInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
-            <Button variant="outline" onClick={deleteAllToday} className="text-xs px-3 py-1.5 border-warning/30">Delete Today</Button>
+        <button
+          onClick={() => setBulkOpen((v) => !v)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <div>
+            <p className="text-sm font-semibold tracking-tight">Bulk delete tasks</p>
+            <p className="text-xs text-muted mt-1">Projects are tasks — these will delete them too (with steps). Type DELETE to confirm.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted w-28">Backlog ({backlog.length})</span>
-            <input value={bulkBacklogInput} onChange={(e) => setBulkBacklogInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
-            <Button variant="outline" onClick={deleteAllBacklog} className="text-xs px-3 py-1.5 border-warning/30">Delete Backlog</Button>
+          <span className="text-xs text-muted border border-border rounded-button px-3 py-1.5 bg-background ml-3 shrink-0">
+            {bulkOpen ? "Hide" : "Show"}
+          </span>
+        </button>
+        {bulkOpen && (
+          <div className="mt-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs text-muted sm:w-28 w-full">Today ({today.length})</span>
+              <input value={bulkTodayInput} onChange={(e) => setBulkTodayInput(e.target.value)} placeholder="DELETE" className="flex-1 w-full rounded-button border border-border bg-background px-3 py-2 text-xs" />
+              <Button variant="outline" onClick={deleteAllToday} className="w-full sm:w-auto text-xs px-3 py-2 border-warning/30">Delete Today</Button>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs text-muted sm:w-28 w-full">Backlog ({backlog.length})</span>
+              <input value={bulkBacklogInput} onChange={(e) => setBulkBacklogInput(e.target.value)} placeholder="DELETE" className="flex-1 w-full rounded-button border border-border bg-background px-3 py-2 text-xs" />
+              <Button variant="outline" onClick={deleteAllBacklog} className="w-full sm:w-auto text-xs px-3 py-2 border-warning/30">Delete Backlog</Button>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs text-muted sm:w-28 w-full">ALL ({today.length + backlog.length})</span>
+              <input value={bulkAllInput} onChange={(e) => setBulkAllInput(e.target.value)} placeholder="DELETE" className="flex-1 w-full rounded-button border border-border bg-background px-3 py-2 text-xs" />
+              <Button variant="outline" onClick={deleteAllTasks} className="w-full sm:w-auto text-xs px-3 py-2 bg-warning/10 border-warning/30">Delete ALL</Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted w-28">ALL ({today.length + backlog.length})</span>
-            <input value={bulkAllInput} onChange={(e) => setBulkAllInput(e.target.value)} placeholder="DELETE" className="flex-1 rounded-button border border-border bg-background px-3 py-1.5 text-xs" />
-            <Button variant="outline" onClick={deleteAllTasks} className="text-xs px-3 py-1.5 bg-warning/10 border-warning/30">Delete ALL</Button>
-          </div>
-        </div>
+        )}
       </Card>
 
       <div>

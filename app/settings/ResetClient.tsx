@@ -11,6 +11,7 @@ export function ResetClient({ userId }: { userId: string }) {
   const [exportChecked, setExportChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [dangerOpen, setDangerOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -77,41 +78,50 @@ export function ResetClient({ userId }: { userId: string }) {
 
   return (
     <Card className="p-6 border-warning/20 bg-warning/5">
-      <h2 className="text-sm font-semibold tracking-tight text-foreground">Danger zone — Reset workspace</h2>
-      <p className="text-xs text-muted mt-1">Deletes all your data, keeps login. Projects are tasks, so they’re deleted too with their steps. V2 tables (flashcards, quizzes, urges) also wiped if they exist.</p>
-
-      <div className="mt-4 rounded-card border border-border bg-surface p-4 text-xs">
-        <p className="font-medium text-foreground">What will be deleted for this user:</p>
-        <ul className="mt-2 space-y-1 text-muted">
-          <li>Tasks (including projects + subtasks): <span className="text-foreground font-medium">{String(counts.tasks ?? "?")}</span></li>
-          <li>Habits: <span className="text-foreground font-medium">{String(counts.habits ?? "?")}</span> — logs: {String(counts.habit_logs ?? "?")}</li>
-          <li>Brain dumps: <span className="text-foreground font-medium">{String(counts.brain_dumps ?? "?")}</span></li>
-          <li>V2 future (if any): flashcards {String(counts.flashcards ?? 0)}, quizzes {String(counts.quizzes ?? 0)}, urges {String(counts.urges ?? 0)}</li>
-        </ul>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <label className="flex items-center gap-2 text-xs">
-          <input type="checkbox" checked={exportChecked} onChange={(e) => setExportChecked(e.target.checked)} />
-          <span className="text-foreground">I exported JSON (or I don’t need it) — I know this can’t be restored</span>
-        </label>
-
-        <div className="flex items-center gap-3">
-          <input
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="Type RESET"
-            className="flex-1 rounded-card border border-border bg-background px-4 py-2.5 text-sm focus:border-warning focus:outline-none"
-          />
-          <Button variant="outline" onClick={handleReset} disabled={loading || confirm !== "RESET" || !exportChecked} className="px-6 bg-warning/10 border-warning/30 hover:bg-warning/15 disabled:opacity-50">
-            {loading ? "Resetting…" : "Reset everything"}
-          </Button>
+      <button onClick={() => setDangerOpen((v) => !v)} className="w-full flex items-center justify-between text-left">
+        <div>
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">Danger zone — Reset workspace</h2>
+          <p className="text-xs text-muted mt-1">Deletes all your data, keeps login. Projects are tasks, so they’re deleted too with their steps. V2 tables also wiped if they exist.</p>
         </div>
+        <span className="text-xs text-muted border border-border rounded-button px-3 py-1.5 bg-surface ml-3 shrink-0">{dangerOpen ? "Hide" : "Show"}</span>
+      </button>
 
-        {msg && <p className={`text-xs rounded-button px-3 py-2 border ${msg.includes("done") ? "bg-accent-soft border-accent-muted text-accent-dark" : "bg-warning/10 border-warning/20 text-foreground"}`}>{msg}</p>}
+      {dangerOpen && (
+        <>
+          <div className="mt-4 rounded-card border border-border bg-surface p-4 text-xs">
+            <p className="font-medium text-foreground">What will be deleted for this user:</p>
+            <ul className="mt-2 space-y-1 text-muted">
+              <li>Tasks (including projects + subtasks): <span className="text-foreground font-medium">{String(counts.tasks ?? "?")}</span></li>
+              <li>Habits: <span className="text-foreground font-medium">{String(counts.habits ?? "?")}</span> — logs: {String(counts.habit_logs ?? "?")}</li>
+              <li>Brain dumps: <span className="text-foreground font-medium">{String(counts.brain_dumps ?? "?")}</span></li>
+              <li>V2 future (if any): flashcards {String(counts.flashcards ?? 0)}, quizzes {String(counts.quizzes ?? 0)}, urges {String(counts.urges ?? 0)}</li>
+            </ul>
+          </div>
 
-        <p className="text-xs text-muted">Keep login: you stay signed in, just data wiped. To delete account entirely, do Supabase → Authentication → Users → Delete user.</p>
-      </div>
+          <div className="mt-4 space-y-3">
+            <label className="flex items-start gap-2 text-xs">
+              <input type="checkbox" checked={exportChecked} onChange={(e) => setExportChecked(e.target.checked)} className="mt-0.5" />
+              <span className="text-foreground">I exported JSON (or I don’t need it) — I know this can’t be restored</span>
+            </label>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Type RESET"
+                className="flex-1 w-full rounded-card border border-border bg-background px-4 py-2.5 text-sm focus:border-warning focus:outline-none"
+              />
+              <Button variant="outline" onClick={handleReset} disabled={loading || confirm !== "RESET" || !exportChecked} className="w-full sm:w-auto px-6 bg-warning/10 border-warning/30 hover:bg-warning/15 disabled:opacity-50">
+                {loading ? "Resetting…" : "Reset everything"}
+              </Button>
+            </div>
+
+            {msg && <p className={`text-xs rounded-button px-3 py-2 border ${msg.includes("done") ? "bg-accent-soft border-accent-muted text-accent-dark" : "bg-warning/10 border-warning/20 text-foreground"}`}>{msg}</p>}
+
+            <p className="text-xs text-muted">Keep login: you stay signed in, just data wiped. To delete account entirely, do Supabase → Authentication → Users → Delete user.</p>
+          </div>
+        </>
+      )}
     </Card>
   );
 }
